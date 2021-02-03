@@ -1,9 +1,0 @@
-"0","rf_tune_res <- tune_grid(
-  rf_wf,
-  grid = tune_grid,
-  resamples = vb_folds,
-  control = control_grid(verbose = T)
-)
-"
-"2","Error: Some package installs are required: 'ranger'
-"

@@ -1,2 +1,0 @@
-"0","titanic_prep <- titanic_recipe %>% prep(training = titanic_train) "
-"2","There are new levels in a factor: NA"

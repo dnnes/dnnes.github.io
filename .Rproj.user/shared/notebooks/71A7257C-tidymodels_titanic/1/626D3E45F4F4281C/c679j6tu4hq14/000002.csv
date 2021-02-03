@@ -1,4 +1,0 @@
-"0","titanic_train %>% group_by(Title) %>% summarise(N = n(), S = sum(as.numeric(levels(Survived)[Survived]))) %>% dplyr::arrange(N)
-"
-"2","`summarise()` ungrouping output (override with `.groups` argument)
-"

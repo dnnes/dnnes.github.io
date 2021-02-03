@@ -1,7 +1,0 @@
-"0","titanic_final <- titanic_recipe %>% bake(new_data = titanic_test, -all_outcomes(), verbose = TRUE) 
-"
-"2","Error: Must subset columns with a valid subscript vector.
-[31mx[39m Subscript has the wrong type `logical`.
-[34mℹ[39m It must be numeric or character.
-[90mRun `rlang::last_error()` to see where the error occurred.[39m
-"
