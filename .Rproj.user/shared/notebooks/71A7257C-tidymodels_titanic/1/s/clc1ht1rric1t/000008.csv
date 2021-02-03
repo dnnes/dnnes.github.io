@@ -1,0 +1,13 @@
+"0","titanic_recipe <- recipe(Survived ~ Sex + Age + Pclass + Fare + Title + Embarked, "
+"0","                         data = titanic_train) %>%"
+"0","  step_novel(Title, new_level = ""n"") %>% "
+"0","  step_other(Title, threshold = 0.001) %>% "
+"0","  step_dummy(all_nominal(),one_hot = T, -Survived) %>% "
+"0","  step_knnimpute(all_predictors(), neighbors = 3)"
+"0","titanic_recipe"
+"1","Data Recipe
+
+"
+"1","Inputs:
+
+"

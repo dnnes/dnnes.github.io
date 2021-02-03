@@ -1,0 +1,3 @@
+"0","autoplot(xgb_res) + "
+"0","  theme_bw() +"
+"0","  theme(axis.text.x=element_text(angle = -90, hjust = 0)) "

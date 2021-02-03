@@ -1,0 +1,48 @@
+"0","library(dplyr)
+"
+"2","
+Attaching package: ‘dplyr’
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+"
+"0","library(dplyr)"
+"0","library(readr)"
+"0","library(tidymodels)"
+"2","[30m── [1mAttaching packages[22m ───────────────────────────────────────────────────────── tidymodels 0.1.2 ──[39m
+"
+"2","[30m[32m✓[30m [34mbroom    [30m 0.7.2      [32m✓[30m [34mrecipes  [30m 0.1.15
+[32m✓[30m [34mdials    [30m 0.0.9      [32m✓[30m [34mrsample  [30m 0.0.8 
+[32m✓[30m [34mggplot2  [30m 3.3.2      [32m✓[30m [34mtibble   [30m 3.0.4 
+[32m✓[30m [34minfer    [30m 0.5.3      [32m✓[30m [34mtidyr    [30m 1.1.2 
+[32m✓[30m [34mmodeldata[30m 0.1.0      [32m✓[30m [34mtune     [30m 0.1.2 
+[32m✓[30m [34mparsnip  [30m 0.1.4      [32m✓[30m [34mworkflows[30m 0.2.1 
+[32m✓[30m [34mpurrr    [30m 0.3.4      [32m✓[30m [34myardstick[30m 0.0.7 [39m
+"
+"2","[30m── [1mConflicts[22m ──────────────────────────────────────────────────────────── tidymodels_conflicts() ──
+[31mx[30m [34mpurrr[30m::[32mdiscard()[30m  masks [34mscales[30m::discard()
+[31mx[30m [34mdplyr[30m::[32mfilter()[30m   masks [34mstats[30m::filter()
+[31mx[30m [34mdplyr[30m::[32mlag()[30m      masks [34mstats[30m::lag()
+[31mx[30m [34myardstick[30m::[32mspec()[30m masks [34mreadr[30m::spec()
+[31mx[30m [34mrecipes[30m::[32mstep()[30m   masks [34mstats[30m::step()[39m
+"
+"0","library(dplyr)"
+"0","library(readr)"
+"0","library(tidymodels)"
+"0","titanic_train <- readr::read_csv(""~/Kaggle/Titanic/train.csv"", "
+"0","                                 col_types = cols(Sex ='f', "
+"0","                                                  Pclass ='f', "
+"0","                                                  Survived = 'f', "
+"0","                                                  Embarked = 'f'))"
+"0","titanic_test <- readr::read_csv(""~/Kaggle/Titanic/test.csv"", "
+"0","                                col_types = cols(Sex ='f', "
+"0","                                                 Pclass ='f', "
+"0","                                                 Embarked = 'f'))"

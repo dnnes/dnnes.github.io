@@ -1,0 +1,23 @@
+"0","library(viridis)"
+"2","Loading required package: viridisLite
+"
+"2","
+Attaching package: ‘viridis’
+
+"
+"2","The following object is masked from ‘package:scales’:
+
+    viridis_pal
+
+"
+"0","autoplot(rf_tune_res)+ "
+"0","  theme_bw() + "
+"0","  scale_color_viridis_d() "
+"2","Fontconfig warning: ""/home/shepherd/.config/fontconfig/fonts.conf"", line 15: missing edit name
+Fontconfig error: ""/home/shepherd/.config/fontconfig/fonts.conf"", line 15: invalid attribute 'mode'
+"
+"2","Fontconfig error: ""/home/shepherd/.config/fontconfig/fonts.conf"", line 16: invalid attribute 'name'
+Fontconfig warning: ""~/.fonts.conf"", line 15: missing edit name
+Fontconfig error: ""~/.fonts.conf"", line 15: invalid attribute 'mode'
+Fontconfig error: ""~/.fonts.conf"", line 16: invalid attribute 'name'
+"

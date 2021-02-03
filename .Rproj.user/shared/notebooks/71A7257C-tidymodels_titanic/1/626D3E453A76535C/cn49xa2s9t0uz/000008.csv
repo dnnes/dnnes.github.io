@@ -1,0 +1,6 @@
+"0","final_rf_fit <- fit(final_rf, bake(titanic_prep, new_data = titanic_train))
+"
+"2","There are new levels in a factor: NA"
+"2","Error: Not all variables in the recipe are present in the supplied training set: 'Sex', 'Pclass', 'Title', 'Embarked'.
+[90mRun `rlang::last_error()` to see where the error occurred.[39m
+"

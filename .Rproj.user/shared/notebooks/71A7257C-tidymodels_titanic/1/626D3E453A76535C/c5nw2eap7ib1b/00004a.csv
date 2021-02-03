@@ -1,0 +1,7 @@
+"0","library(viridis)"
+"0","collect_metrics(rf_tune_res) %>% "
+"0","  filter(.metric == ""roc_auc"") %>% "
+"0","  ggplot(aes(x = mtry, y = mean, group = min_n, color =as.character(min_n))) +"
+"0","  geom_line() +"
+"0","  facet_wrap(trees ~ . )+"
+"0","  scale_color_viridis(discrete = TRUE)"

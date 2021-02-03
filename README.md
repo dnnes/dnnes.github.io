@@ -1,2 +1,0 @@
-# dnnes.github.io
-blog

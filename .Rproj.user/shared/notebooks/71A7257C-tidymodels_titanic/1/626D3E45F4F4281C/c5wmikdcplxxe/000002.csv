@@ -1,0 +1,40 @@
+"0","titanic_recipe <- recipe(Survived ~ Sex + Age + Pclass + Fare + Title + Embarked, 
+                         data = titanic_train) %>%
+  step_novel(Title, new_level = ""o"") %>% 
+  step_other(Title, threshold = 0.005) %>% 
+  step_dummy(all_nominal(), -Survived) %>% 
+  step_knnimpute(all_predictors(), neighbors = 3) %>% 
+  prep(training = titanic_train, verbose = TRUE)
+"
+"1","oper 1 step novel"
+"1"," "
+"1","[training]"
+"1"," "
+"1","
+"
+"1","oper 2 step other"
+"1"," "
+"1","[training]"
+"1"," "
+"1","
+"
+"1","oper 3 step dummy"
+"1"," "
+"1","[training]"
+"1"," "
+"1","
+"
+"2","There are new levels in a factor: NA"
+"1","oper 4 step knnimpute"
+"1"," "
+"1","[training]"
+"1"," "
+"1","
+"
+"1","The retained training set is ~"
+"1"," "
+"1","0.1 Mb"
+"1"," "
+"1"," in memory.
+
+"

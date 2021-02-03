@@ -1,0 +1,400 @@
+---
+title: "Titanic"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(dplyr)
+require(tidymodels)
+require(randomForest)
+require(magrittr)
+require(readr)
+require(ggplot2)
+require(caret)
+require(e1071)
+require(fastAdaboost)
+require(xgboost)
+require(Matrix)
+require(fastDummies)
+```
+
+```{r}
+titanic_train <- readr::read_csv("~/Kaggle/Titanic/train.csv", 
+                                 col_types = cols(Sex ='f', Pclass ='f', Survived = 'f', Embarked = 'f'))
+
+titanic_test <- readr::read_csv("~/Kaggle/Titanic/test.csv", col_types = cols(Sex ='f', Pclass ='f', Embarked = 'f'))
+
+all_dat <- rbind(subset(titanic_train, select = -Survived), titanic_test)
+is.na(all_dat$Age) %>% sum()
+is.na(titanic_train$Age) %>% sum()
+
+all_dat$title = stringr::str_match(all_dat$Name, "([A-Za-z]+)\\.")[,2]
+all_dat %<>% mutate(solo = factor(if_else(SibSp + Parch > 0, 1, 0)))
+
+com_idade <- all_dat %>% filter(!is.na(Age))
+sem_idade <- all_dat %>% filter(is.na(Age))
+
+modelo_idade <- train(Age ~ Pclass + Sex + SibSp + Embarked, com_idade, method = 'lm', na.action = na.pass)
+
+summary(modelo_idade)
+#sem_idade$Age <- predict(modelo_idade, sem_idade)
+sem_idade <- sem_idade %>% mutate(Age = round(predict(modelo_idade, sem_idade), 0))
+
+#all_dat %>% filter(PassengerId %in% sem_idade$PassengerId) %>% mutate(Age == sem_idade$Age) %>% View()
+
+all_dat[all_dat$PassengerId %in% sem_idade$PassengerId,]$Age <- sem_idade$Age
+all_dat[all_dat$Age<0, ]$Age <- 0
+
+titanic_train$Age <- all_dat[0:891,]$Age
+titanic_train$Solo <- all_dat[0:891,]$solo
+titanic_train$Title <- as.factor(all_dat[0:891,]$title)
+
+titanic_test$Age <- all_dat[892:1309,]$Age
+titanic_test$Solo <- all_dat[892:1309,]$solo
+titanic_test$Title <- as.factor(all_dat[892:1309,]$title)
+
+
+
+
+sum(is.na(titanic_test$Age))
+sum(is.na(titanic_train$Age))
+all_dat$PassengerId
+summary(titanic_train)
+```
+
+```{r}
+summary(titanic_test)
+```
+
+```{r}
+glimpse(titanic_train)
+```
+
+
+```{r}
+sum(is.na(titanic_train$Embarked))
+```
+
+
+
+```{r}
+titanic_train %>% ggplot(aes(x = Sex, fill = Survived)) + geom_bar()
+```
+
+```{r}
+titanic_train %>% ggplot(aes(x = Title, fill = Sex)) + geom_bar() + facet_wrap(~Survived)
+```
+
+
+```{r}
+titanic_train %>% ggplot(aes(x = Pclass, fill = Survived)) + geom_bar() + facet_wrap(~Sex)
+```
+
+
+```{r}
+group_by(titanic_train, Cabin, Pclass) %>% summarise(n = n()) %>% arrange(-n) %>% filter(n > 1)
+
+```
+
+```{r}
+titanic_train$Age_cut <- cut(titanic_train$Age, breaks = seq(0,100, 10))
+titanic_train %>% ggplot(aes(x = Age_cut, fill = Survived)) + geom_bar() + facet_grid(~Sex)
+
+```
+```{r}
+all_dat$Age_cut <- cut(all_dat$Age, breaks = seq(0,100, 10))
+
+all_dat %>% ggplot(aes(x = Age_cut)) + geom_bar() + facet_grid(~Sex)
+
+```
+
+
+
+
+```{r}
+plot(titanic_train$Fare, titanic_train$Pclass)
+```
+```{r}
+train_control <- trainControl(method="cv", number=10)
+model <- train(Survived~Sex + Pclass + Fare + Age, 
+               data=titanic_train, 
+               na.action = na.pass,
+               trControl=train_control,
+               method = "glm",
+               family=binomial())
+
+summary(model)
+```
+```{r}
+caret::confusionMatrix(model)
+```
+
+```{r}
+titanic_train <- select(titanic_train,Survived, Sex, Age, Pclass, Fare, Title, Solo, Embarked)
+titanic_train[is.na(titanic_train$Embarked),]$Embarked = 'S'
+
+tt_rec <- recipe(Survived ~ Sex + Age + Pclass + Fare + Title + Embarked + Solo, data = titanic_train) %>%
+  step_knnimpute(all_predictors(), neighbors = 3) %>% 
+  step_dummy(all_nominal(), -all_outcomes())
+
+
+
+
+```
+
+
+```{r}
+#com tidy models
+library(tidymodels)
+xgb_spec <- boost_tree(
+  trees = tune(), 
+  tree_depth = tune(), min_n = tune(), 
+  loss_reduction = tune(),                     ## first three: model complexity
+  sample_size = tune(), mtry = tune(),         ## randomness
+  learn_rate = tune()                         ## step size
+) %>% 
+  set_engine("xgboost") %>% 
+  set_mode("classification")
+
+xgb_grid <- grid_latin_hypercube(
+  tree_depth(),
+  min_n(),
+  trees(range = c(1L, 500L)),
+  loss_reduction(),
+  sample_size = sample_prop(),
+  finalize(mtry(), titanic_train),
+  learn_rate(),
+  size = 20
+)
+
+#Survived ~ Sex + Age + Pclass + Fare + Title + Embarked
+xgb_wf <- workflow() %>%
+  add_recipe(tt_rec) %>% 
+  add_model(xgb_spec)
+
+vb_folds <- vfold_cv(titanic_train, v = 5)
+ctrl_grid <- control_stack_grid()
+
+xgb_res <- tune_grid(
+  xgb_wf,
+  resamples = vb_folds,
+  grid = xgb_grid,
+  control = ctrl_grid
+)
+
+collect_metrics(xgb_res) %>% View()
+show_best(xgb_res)
+best_auc <- collect_metrics(xgb_res)[20,]
+
+final_xgb <- finalize_workflow(
+  xgb_wf,
+  best_auc
+)
+
+final_res <- fit(final_xgb, titanic_train)
+titanic_test$Solo <- as.factor(titanic_test$Solo)
+
+pred <- predict(final_res, titanic_test)
+
+
+dfinal <- data.frame(PassengerId = titanic_test$PassengerId, Survived = pred)
+names(dfinal) <- c("PassengerId", "Survived")
+write_csv(dfinal, "xgb_val_99_imput_solo.csv")
+
+#0.78708
+
+View(dfinal)
+
+yardstick::
+
+```
+
+```{r}
+
+
+rf_spec <- rand_forest(
+  mtry = tune(),
+  trees = tune(),
+  min_n = tune()
+) %>%
+  set_mode("classification") %>%
+  set_engine("randomForest")
+
+rf_wf <- workflow() %>%
+  add_recipe(tt_rec) %>% 
+  add_model(rf_spec)
+
+rf_tune_res <- tune_grid(
+  rf_wf,
+  trees(range = c(1L, 500L)),
+  resamples = vb_folds,
+  grid = 20,
+
+  control = ctrl_grid
+)
+
+collect_metrics(rf_tune_res) %>% View
+
+best_rf <- select_best(rf_tune_res)
+
+final_rf <- finalize_workflow(
+  rf_wf,
+  best_rf
+)
+
+titanic_test[titanic_test$Title=='Dona',]$Title = 'Miss'
+
+final_rf_fit <- parsnip::fit(final_rf, titanic_train)
+pred_rf <- predict(final_rf_fit, titanic_test)
+sum(is.na(titanic_test$Title))
+
+obj <- pull_workflow_fit(final_rf_fit)
+obj$variable.importance
+
+rf_final <- data.frame(PassengerId = titanic_test$PassengerId, Survived = pred_rf)
+names(rf_final) <- c("PassengerId", "Survived")
+write_csv(rf_final, "rf_val_solo.csv")
+
+#0.76794
+
+```
+```{r}
+library("stacks")
+ctrl_grid <- control_stack_grid()
+ctrl_res <- control_stack_resamples()
+
+
+
+stks_models <- stacks() %>% 
+  add_candidates(rf_tune_res) %>% 
+  add_candidates(xgb_res) %>% 
+  blend_predictions() %>% 
+  fit_members()
+
+autoplot(stks_models)
+
+
+tt_pred <-
+  titanic_test %>%
+  bind_cols(predict(stks_models, .))
+
+
+ens_final <- data.frame(PassengerId = tt_pred$PassengerId, Survived = tt_pred)
+names(rf_final) <- c("PassengerId", "Survived")
+write_csv(rf_final, "ens_rf_xg.csv")
+
+
+collect_parameters(stks_models, xgb_res)
+#0.76794
+```
+
+
+```{r}
+model2 <- train(Survived~Sex + Pclass + Fare + Age, 
+               data=titanic_train, 
+               na.action = na.pass,
+               trControl=train_control,
+               method = "adaboost")
+
+model2
+```
+
+
+```{r}
+caret::confusionMatrix(model2)
+```
+
+
+```{r}
+matrix_train <- as.matrix(titanic_train[c('Sex', 'Pclass', 'Fare', 'Age')])
+matrix_test <- as.matrix(titanic_test[c('Sex', 'Pclass', 'Fare', 'Age')])
+
+fastdm <- fastDummies::dummy_cols(titanic_train[c('Sex', 'Pclass', 'Fare', 'Age')], remove_first_dummy = T)
+fdtest <- fastDummies::dummy_cols(titanic_test[c('Sex', 'Pclass', 'Fare', 'Age')], remove_first_dummy = T)
+
+matrix_label <- as.matrix(titanic_train$Survived)
+
+sparsem <- as.matrix(fastdm[c('Fare', 'Age', 'Sex_female', 'Pclass_2', 'Pclass_1')])
+
+sparsemtest <- as.matrix(fdtest[c('Fare', 'Age', 'Sex_female', 'Pclass_2', 'Pclass_1')])
+
+model3 <- xgboost(data = sparsem, label = matrix_label, 
+                  #max.depth = 10,
+                  nfold = 10,
+                  nround=30,
+                  #eta = 0.5, 
+                  #nthread = 2, 
+                  #subsample = 0.75,
+                  objective = "binary:logistic"
+                  #eval_metric = "merror",
+                  )
+
+
+pred <- predict(model3, sparsem)
+err <- sum(as.numeric(pred > 0.5) == titanic_train$Survived)
+err/nrow(sparsem)
+
+
+pred_final <- predict(model3, sparsemtest)
+dfinal <- data.frame(PassengerId = titanic_test$PassengerId, Survived = if_else(pred_final >= 0.5, 1, 0))
+titanic_test$PassengerId
+if_else(pred_final >= 0.5, 1, 0)
+
+
+write_csv(dfinal, "submission9.csv")
+
+
+
+```
+
+
+
+remover NA's de idade
+acertar xboost
+
+
+```{r}
+trControl <- trainControl(method='repeatedcv', 
+                        number=5, 
+                        repeats=5,
+                        search = 'random')
+
+tuneGrid <- expand.grid(mtry = 4)
+
+#nodesize = 1, maxnodes = 30, ntree = 1500
+#3     0.8316622  0.6348169
+  modelrf <- train(Survived ~ Pclass + Sex + Age + Fare,
+    data = titanic_train,
+    method = "rf",
+    metric = "Accuracy",
+    #tuneGrid = tuneGrid,
+    #mtry = 4,
+    trControl = trControl,
+    importance = TRUE,
+    nodesize = 3,
+    maxnodes = 50,
+    ntree = 500)
+  print(modelrf)
+
+# Print the results
+confusionMatrix(modelrf)
+
+randomForest::rfcv( trainy = titanic_train$Survived, trainx = titanic_train %>% select(Pclass, Sex, Age, Fare),
+    data = titanic_train, cv.fold = 10)
+
+titanic_test[is.na(titanic_test$Fare),]$Fare <- 0
+
+pred = predict(modelrf, newdata = titanic_train, verbose = T)
+err <- sum(pred == titanic_train$Survived)
+err/nrow(titanic_train)
+summary(titanic_test)
+
+pred_final <- predict(modelrf, titanic_test, verbose = 1)
+dfinal <- data.frame(PassengerId = titanic_test$PassengerId, Survived = pred_final )
+
+write_csv(dfinal, "submission17.csv")
+
+sum(is.na(titanic_train$Survived))
+```
+

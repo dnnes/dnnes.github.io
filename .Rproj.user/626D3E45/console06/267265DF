@@ -1,0 +1,26 @@
+]0;/home/shepherd/githubio/dnnes.github.io]0;shepherd@lain: ~/githubio/dnnes.github.ioshepherd@lain:~/githubio/dnnes.github.io$ Fontconfig warning: "/home/shepherd/.config/fontconfig/fonts.conf", line 15: missing edit name
+Fontconfig error: "/home/shepherd/.config/fontconfig/fonts.conf", line 15: invalid attribute 'mode'
+Fontconfig error: "/home/shepherd/.config/fontconfig/fonts.conf", line 16: invalid attribute 'name'
+Fontconfig warning: "~/.fonts.conf", line 15: missing edit name
+Fontconfig error: "~/.fonts.conf", line 15: invalid attribute 'mode'
+Fontconfig error: "~/.fonts.conf", line 16: invalid attribute 'name'
+
+** (volumeicon:15653): [1;33mWARNING[0m **: Binding 'XF86AudioRaiseVolume' failed!
+Failed to bind XF86AudioRaiseVolume
+
+** (volumeicon:15653): [1;33mWARNING[0m **: Binding 'XF86AudioLowerVolume' failed!
+Failed to bind XF86AudioLowerVolume
+]0;/home/shepherd/githubio/dnnes.github.io]0;shepherd@lain: ~/githubio/dnnes.github.ioshepherd@lain:~/githubio/dnnes.github.io$ [K]0;shepherd@lain: ~/githubio/dnnes.github.ioshepherd@lain:~/githubio/dnnes.github.io$ Fontconfig warning: "/home/shepherd/.config/fontconfig/fonts.conf", line 15: missing edit name
+Fontconfig error: "/home/shepherd/.config/fontconfig/fonts.conf", line 15: invalid attribute 'mode'
+Fontconfig error: "/home/shepherd/.config/fontconfig/fonts.conf", line 16: invalid attribute 'name'
+Fontconfig warning: "~/.fonts.conf", line 15: missing edit name
+Fontconfig error: "~/.fonts.conf", line 15: invalid attribute 'mode'
+Fontconfig error: "~/.fonts.conf", line 16: invalid attribute 'name'
+
+** (volumeicon:5140): [1;33mWARNING[0m **: Binding 'XF86AudioRaiseVolume' failed!
+Failed to bind XF86AudioRaiseVolume
+
+** (volumeicon:5140): [1;33mWARNING[0m **: Binding 'XF86AudioLowerVolume' failed!
+Failed to bind XF86AudioLowerVolume
+^C
+]0;/home/shepherd/githubio/dnnes.github.io]0;shepherd@lain: ~/githubio/dnnes.github.ioshepherd@lain:~/githubio/dnnes.github.io$ 
