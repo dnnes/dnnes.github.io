@@ -1,2 +1,0 @@
-"0","tune_grid <- expand.grid(mtry = 2:25, trees = c(1000), min_n = seq(3, 30, by = 2))"
-"0","vb_folds <- rsample::vfold_cv(data = titanic_train, strata = Survived, v = 5 )"

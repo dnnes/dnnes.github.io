@@ -1,2 +1,0 @@
-"0","titanic_train$Title = stringr::str_match(titanic_train$Name, ""([A-Za-z]+)\\."")[,2] %>% as.factor()"
-"0","titanic_test$Title = stringr::str_match(titanic_test$Name, ""([A-Za-z]+)\\."")[,2] %>% as.factor()"

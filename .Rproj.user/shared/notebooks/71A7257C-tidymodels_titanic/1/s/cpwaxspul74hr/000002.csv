@@ -1,3 +1,0 @@
-"0","rf_final <- data.frame(PassengerId = titanic_test$PassengerId, Survived = pred_rf)"
-"0","names(rf_final) <- c(""PassengerId"", ""Survived"")"
-"0","readr::write_csv(rf_final, ""rf_pred_final.csv"")"

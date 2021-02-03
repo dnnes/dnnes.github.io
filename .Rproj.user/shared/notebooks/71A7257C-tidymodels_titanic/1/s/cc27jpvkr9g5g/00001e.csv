@@ -1,3 +1,0 @@
-"0","pull_workflow_fit(final_rf_fit) %>% "
-"0","  vip::vip(aesthetics  = list(fill = ""#264653""))+"
-"0","  theme_bw() "

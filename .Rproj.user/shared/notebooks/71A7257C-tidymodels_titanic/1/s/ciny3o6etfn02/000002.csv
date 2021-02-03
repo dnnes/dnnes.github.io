@@ -1,6 +1,0 @@
-"0","best_xgb<- select_best(xgb_res)"
-"2","No value of `metric` was given; metric 'roc_auc' will be used."
-"0","final_xgb <- finalize_workflow("
-"0","  xgb_wf,"
-"0","  best_xgb"
-"0",")"

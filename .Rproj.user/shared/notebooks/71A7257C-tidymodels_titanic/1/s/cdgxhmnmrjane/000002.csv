@@ -1,2 +1,0 @@
-"0","final_rf_fit <- fit(final_rf, data = titanic_train)"
-"0","pred_rf <- predict(final_rf_fit, titanic_test)"

@@ -1,4 +1,0 @@
-"0","final_rf <- finalize_workflow("
-"0","  rf_wf,"
-"0","  best_rf"
-"0",")"
