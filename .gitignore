@@ -39,5 +39,5 @@ vignettes/*.pdf
 .Renviron
 .Rproj.user
 
-#csv
+#csv 
 .csv
