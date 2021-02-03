@@ -1,19 +1,11 @@
-name: "Mywebsite"
-title: "My new website"
-type: inverse
+name: "Dnnes"
+title: "Dnnes"
+type: 
 left:
-  - text: "About me"
+  - text: "Posts"
     menu:
-      - text: "Learn more about me"
-        href: ./aboutme.html
-  - text: "Project"
-    menu:
-       - text: "Project part 1"
-         href: ./project1.html
-       - text: "Project part 2"
-         href: ./project2.html
-  - text: "Contact"
-    href: ./contact.html
+       - text: "Utilizando Tidymodels com a base Titanic"
+         href: ./tidymodels_titanic.html
 right:
   - icon: fa-github fa-lg
-    href: https://github.com/githubusername/mywebsite
+    href: https://github.com/dnnes
