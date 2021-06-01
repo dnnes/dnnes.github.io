@@ -64,10 +64,12 @@ Um modo de testar o login do awscli é executar a listagem dos buckets S3 com o 
 se obtiver algum erro de autenticação aqui, será necessário rever suas credenciais editando `~/.aws/credentials`.
 
 Se tudo estiver funcionando corretamente, é hora de executar `metaflow configure aws` e preencher com as ARN's (Amazon Resource Name). Este comando cria o arquivo `config.json` em `~/.metaflowconfig/config.json`. O meu ficou assim:
+
 ![](/images/config_json.png)  
 
 
 E por fim, para testar o se tudo está OK, eu rodo o tutorial `helloaws`:
+
 ![](/images/all_process.png)  
 
 ###Simples assim?
