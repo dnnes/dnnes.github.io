@@ -292,7 +292,12 @@ $(document).ready(function () {
 <p>No último passo o exemplo mínimo que vamos utilizar para testar se tudo foi configurado corretamente é o <code>helloaws.py</code>.</p>
 <p>Os passos de configuração na AWS eu segui exatamente a <a href="https://admin-docs.metaflow.org/metaflow-on-aws/deployment-guide/manual-deployment">receita do manual</a>, não faz sentido reproduzir aqui. Do passo de <strong>metadados</strong> pra frente não utilizei nenhum recurso.</p>
 <p>Resumindo, foi necessário criar:</p>
-<p>-S3 Buckets; -Elastic IP; -VPC que utiliza o Elastic IP previamente criado, com subnets pública e privada, a pública deve possuir atribuição de IP; -Managed AWS Batch compute environment com instâncias EC2 On-Demand, Spot ou Fargate; -Queue para o Batch; -IAM para o Batch;</p>
+<p>-S3 Buckets;</p>
+<p>-Elastic IP;</p>
+<p>-VPC que utiliza o Elastic IP previamente criado, com subnets pública e privada, a pública deve possuir atribuição de IP;</p>
+<p>-Managed AWS Batch compute environment com instâncias EC2 On-Demand, Spot ou Fargate;</p>
+<p>-Queue para o Batch;</p>
+<p>-IAM para o Batch;</p>
 <p>Um modo de testar o login do awscli é executar a listagem dos buckets S3 com o comando <code>aws s3api list-buckets</code>:</p>
 <div class="figure">
 <img src="/images/list_buckets.png" />
@@ -309,10 +314,11 @@ $(document).ready(function () {
 <img src="/images/all_process.png" />
 
 </div>
+<p>A primeira task é executada localmente. A segunda tarefa que vemos na imagem já roda na AWS; vemos o avanço do status da task na queue, o setup do ambiente e finalmente a tarefa é executada remotamente: um print &quot;Metaflow says: Hi from AWS&quot; (seguido de um warning de descontinuação de pacote na minha máquina).</p>
 </div>
 <div id="simples-assim" class="section level3">
 <h3>Simples assim?</h3>
-<p>Aqui devo confessar que (por minha culpa)o processo não foi tão direto. Falhei em alguns passos do tutorial de deploy e por várias vezes, ao tentar executar o <code>helloaws.py</code>, me peguei assistindo o status RUNNABLE do AWS batch sendo impresso no terminal por alguns minutos antes de me convencer que não sairia disso e cancelar manualmente o job. Em outras tentativas, sem qualquer mudança nas configurações, tudo fluia sem maiores problemas. Verifiquei que a maquina virtual era criada e passei a desconfiar da VPC. Acabei criando um log na CloudWatch para a VPC que estava utilizando e percebi que a intermitência se devia à configuração das subnets. Provavelmente eu negligenciei o parágrafo do guia de deploy que diz <strong>“These subnets are not auto-assigned public IPv4 addresses. Instances launched in the public subnet must be assigned a public IPv4 address to communicate with the Amazon ECS service endpoint.”</strong> Editei a configuração de ip auto-atribuido na sub publica e tudo se resolveu. Até o momento não tive mais o problema.</p>
+<p>Aqui devo confessar que (por minha culpa)o processo não foi tão direto. Falhei em alguns passos do tutorial de deploy e por várias vezes, ao tentar executar o <code>helloaws.py</code>, me peguei assistindo o status RUNNABLE do AWS batch sendo impresso no terminal por alguns minutos antes de me convencer que não sairia disso e cancelar manualmente o job. Em outras tentativas, sem qualquer mudança nas configurações, tudo fluia sem maiores problemas. Verifiquei que a maquina virtual era criada e passei a desconfiar da VPC. Acabei criando um log na CloudWatch para a VPC que estava utilizando e percebi que a intermitência se devia à configuração das subnets. Provavelmente eu negligenciei o parágrafo do guia de deploy que diz <strong>“These subnets are not auto-assigned public IPv4 addresses. Instances launched in the public subnet must be assigned a public IPv4 address to communicate with the Amazon ECS service endpoint.”</strong> Editei a configuração de ip auto-atribuido na sub publica (na imagem abaixo, no canto superior direito) e tudo se resolveu. Até o momento não tive mais o problema.</p>
 <div class="figure">
 <img src="/images/public_ipv4.png" />
 
@@ -325,6 +331,10 @@ $(document).ready(function () {
 <img src="/images/access.png" />
 
 </div>
+</div>
+<div id="próximos-posts" class="section level3">
+<h3>Próximos posts</h3>
+<p>Pretendo fazer pelo menos mais dois posts para esclarecer 1)Como utilizar containers personalizados e as vantagens de utilizar EC2, Spot ou Fargate; 2)Demonstrar o uso do metaflow com o R.</p>
 </div>
 
 

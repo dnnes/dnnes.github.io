@@ -45,12 +45,18 @@ Os passos de configuração na AWS eu segui exatamente a [receita do manual](htt
 
 Resumindo, foi necessário criar:
 
--S3 Buckets;
--Elastic IP;
--VPC que utiliza o Elastic IP previamente criado, com subnets pública e privada, a pública deve possuir atribuição de IP;
--Managed AWS Batch compute environment com instâncias EC2 On-Demand, Spot ou Fargate;
--Queue para o Batch;
--IAM para o Batch;
+-S3 Buckets; 
+
+-Elastic IP; 
+
+-VPC que utiliza o Elastic IP previamente criado, com subnets pública e  privada, a pública deve possuir atribuição de IP; 
+
+-Managed AWS Batch compute environment com instâncias EC2 On-Demand, Spot ou Fargate; 
+
+-Queue para o Batch; 
+
+-IAM para o Batch; 
+
 
 
 
@@ -70,10 +76,12 @@ Se tudo estiver funcionando corretamente, é hora de executar `metaflow configur
 
 E por fim, para testar o se tudo está OK, eu rodo o tutorial `helloaws`:
 
-![](/images/all_process.png)  
+![](/images/all_process.png)   
+
+A primeira task é executada localmente. A segunda tarefa que vemos na imagem já roda na AWS; vemos o avanço do status da task na queue, o setup do ambiente e finalmente a tarefa é executada remotamente: um print "Metaflow says: Hi from AWS" (seguido de um warning de descontinuação de pacote na minha máquina).
 
 ###Simples assim?
-Aqui devo confessar que (por minha culpa)o processo não foi tão direto. Falhei em alguns passos do tutorial de deploy e por várias vezes, ao tentar executar o `helloaws.py`, me peguei assistindo o status RUNNABLE do AWS batch sendo impresso no terminal por alguns minutos antes de me convencer que não sairia disso e cancelar manualmente o job. Em outras tentativas, sem qualquer mudança nas configurações, tudo fluia sem maiores problemas. Verifiquei que a maquina virtual era criada e passei a desconfiar da VPC. Acabei criando um log na CloudWatch para a VPC que estava utilizando e percebi que a intermitência se devia à configuração das subnets. Provavelmente eu negligenciei o parágrafo do guia de deploy que diz **“These subnets are not auto-assigned public IPv4 addresses. Instances launched in the public subnet must be assigned a public IPv4 address to communicate with the Amazon ECS service endpoint.”** Editei a configuração de ip auto-atribuido na sub publica e tudo se resolveu. Até o momento não tive mais o problema.
+Aqui devo confessar que (por minha culpa)o processo não foi tão direto. Falhei em alguns passos do tutorial de deploy e por várias vezes, ao tentar executar o `helloaws.py`, me peguei assistindo o status RUNNABLE do AWS batch sendo impresso no terminal por alguns minutos antes de me convencer que não sairia disso e cancelar manualmente o job. Em outras tentativas, sem qualquer mudança nas configurações, tudo fluia sem maiores problemas. Verifiquei que a maquina virtual era criada e passei a desconfiar da VPC. Acabei criando um log na CloudWatch para a VPC que estava utilizando e percebi que a intermitência se devia à configuração das subnets. Provavelmente eu negligenciei o parágrafo do guia de deploy que diz **“These subnets are not auto-assigned public IPv4 addresses. Instances launched in the public subnet must be assigned a public IPv4 address to communicate with the Amazon ECS service endpoint.”** Editei a configuração de ip auto-atribuido na sub publica (na imagem abaixo, no canto superior direito) e tudo se resolveu. Até o momento não tive mais o problema.
 
 ![](/images/public_ipv4.png)  
 
@@ -83,5 +91,8 @@ Aqui devo confessar que (por minha culpa)o processo não foi tão direto. Falhei
 
 Vale ressaltar que os créditos da aws educate, que estudantes de algumas universidades têm acesso, são válidos para configurar pelo menos as partes que eu utilizei (buckets S3, vpc com subnets, roles na iam, batch e instâncias ec2). A única ressalva é que as credenciais fornecidas pela Vocareum expiram em um intervalo de tempo fixo (aproximadamente 3hrs) e se a tarefa posta na fila não for concluida antes do termino desse intervalo, você pode obter o erro “An error occurred (ExpiredTokenException) when calling the DescribeJobs operation: The security token included in the request is expired”. Problema de resolução simples: só acessar e copiar as novas credenciais para o documento  ~/.aws/credentials no seu pc, que é automaticamente criado quando o aws cli é instalado.
 
-![](/images/access.png)
+![](/images/access.png)  
 
+###Próximos posts
+
+Pretendo fazer pelo menos mais dois posts para esclarecer 1)Como utilizar containers personalizados e as vantagens de utilizar EC2, Spot ou Fargate; 2)Demonstrar o uso do metaflow com o R.
