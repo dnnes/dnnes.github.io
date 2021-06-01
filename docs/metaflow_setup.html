@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Metaflow - Configuração Mínima</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/simplex.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Dnnes</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Posts
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="./tidymodels_titanic.html">Utilizando Tidymodels com a base Titanic</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dnnes">
+    <span class="fas fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Metaflow - Configuração Mínima</h1>
+
+</div>
+
+
+<p>Recentemente, assistindo às conferencias da useR de 2020 descobri o <a href="https://www.youtube.com/watch?v=gtrODWCpXeo">Metaflow</a>. Dentre várias features oferecidas pela ferramenta desenvolvida na Netflix, a proposta principal, de tornar possível a prototipagem do código localmente e executar algumas partes na nuvem (apenas o tuning do modelo, por exemplo) utilizando os recursos escaláveis de computação da AWS me chamou muito a atenção, já que meu laptop se mostra com poder de processamento bastante defasado para algumas tarefas mais exigentes e a execução do código totalmente na nuvem nem sempre é uma tarefa de poucos minutos.</p>
+<p>Posto de um modo simples a ideia é permitir que o cientista de dados na etapa de desenvolvimento do modelo não perca muito tempo com o provisionamento de infraestrutura e foque mais em otimização e em fature engineering, por exemplo. Um meio do caminho entre prototipagem e produção.</p>
+<div id="apresentando-o-metaflow" class="section level3">
+<h3>Apresentando o Metaflow</h3>
+<p>A biblioteca é open source, escrita em Python e compatível com R. Ainda está em desenvolvimento e uma grande quantidade de informação pode ser encontrada nas issues do diretorio no <a href="https://github.com/Netflix/metaflow">Github</a>. <em>Under the hood</em>, o Metaflow provê uma API para a stack de recursos na AWS previamente configurados. O código será executado em containers de instâncias EC2, Spot ou Fargate. Essas configurações podem ser feitas manualmente (seguindo <a href="https://admin-docs.metaflow.org/metaflow-on-aws/deployment-guide/manual-deployment">este guia</a> de deploy) ou por um template do CloudFormation que automatiza o processo. Eu preferi fazer as configs manuais, o template faz o provisionamento de um conjunto completo de serviços para quem quer utilizar todos os recursos do Metaflow, muito além do que eu preciso agora.</p>
+<p>Outro atrativo é que as modificações necessárias no código para a utilização do Metaflow não são nada complicadas. Um tempo maior é gasto configurando os recursos na AWS que na adaptação do código.</p>
+</div>
+<div id="configuração-mínima" class="section level3">
+<h3>Configuração Mínima</h3>
+<p>Aqui eu vou apresentar um pequeno guia dos passos que segui para conseguir instalar e configurar o Metaflow com uma quantidade reduzida de recursos mas que me permitisse ainda executar o processamento na nuvem.</p>
+<p>O primeiro passo é instalar o <code>awscli</code>, no Debian se faz normalmente via <code>apt-get</code>.</p>
+<p>Em seguida, é necessário copiar suas credenciais AWS para <code>~/.aws/credentials</code>, o que vai permitir a autenticação tanto com o awscli quanto com o Metaflow. Fica assim:</p>
+<div class="figure">
+<img src="/images/credentials_f.png" />
+
+</div>
+<p>O Metaflow já pode ser instalado com o comando <code>pip install metaflow</code></p>
+<p>Agora os tutoriais podem ser baixados com o comando <code>metaflow tutorials pull</code>; para listar os tutoriais <code>metaflow tutorials list</code>; se tudo estiver certo, o resultado será parecido com isso:</p>
+<div class="figure">
+<img src="/images/tutorials.png" />
+
+</div>
+<p>No último passo o exemplo mínimo que vamos utilizar para testar se tudo foi configurado corretamente é o <code>helloaws.py</code>.</p>
+<p>Os passos de configuração na AWS eu segui exatamente a <a href="https://admin-docs.metaflow.org/metaflow-on-aws/deployment-guide/manual-deployment">receita do manual</a>, não faz sentido reproduzir aqui. Do passo de <strong>metadados</strong> pra frente não utilizei nenhum recurso.</p>
+<p>Resumindo, foi necessário criar:</p>
+<p>-S3 Buckets; -Elastic IP; -VPC que utiliza o Elastic IP previamente criado, com subnets pública e privada, a pública deve possuir atribuição de IP; -Managed AWS Batch compute environment com instâncias EC2 On-Demand, Spot ou Fargate; -Queue para o Batch; -IAM para o Batch;</p>
+<p>Um modo de testar o login do awscli é executar a listagem dos buckets S3 com o comando <code>aws s3api list-buckets</code>:</p>
+<div class="figure">
+<img src="/images/list_buckets.png" />
+
+</div>
+<p>se obtiver algum erro de autenticação aqui, será necessário rever suas credenciais editando <code>~/.aws/credentials</code>.</p>
+<p>Se tudo estiver funcionando corretamente, é hora de executar <code>metaflow configure aws</code> e preencher com as ARN's (Amazon Resource Name). Este comando cria o arquivo <code>config.json</code> em <code>~/.metaflowconfig/config.json</code>. O meu ficou assim: <img src="/images/config_json.png" /></p>
+<p>E por fim, para testar o se tudo está OK, eu rodo o tutorial <code>helloaws</code>: <img src="/images/all_process.png" /></p>
+</div>
+<div id="simples-assim" class="section level3">
+<h3>Simples assim?</h3>
+<p>Aqui devo confessar que (por minha culpa)o processo não foi tão direto. Falhei em alguns passos do tutorial de deploy e por várias vezes, ao tentar executar o <code>helloaws.py</code>, me peguei assistindo o status RUNNABLE do AWS batch sendo impresso no terminal por alguns minutos antes de me convencer que não sairia disso e cancelar manualmente o job. Em outras tentativas, sem qualquer mudança nas configurações, tudo fluia sem maiores problemas. Verifiquei que a maquina virtual era criada e passei a desconfiar da VPC. Acabei criando um log na CloudWatch para a VPC que estava utilizando e percebi que a intermitência se devia à configuração das subnets. Provavelmente eu negligenciei o parágrafo do guia de deploy que diz <strong>“These subnets are not auto-assigned public IPv4 addresses. Instances launched in the public subnet must be assigned a public IPv4 address to communicate with the Amazon ECS service endpoint.”</strong> Editei a configuração de ip auto-atribuido na sub publica e tudo se resolveu. Até o momento não tive mais o problema.</p>
+<div class="figure">
+<img src="/images/public_ipv4.png" />
+
+</div>
+</div>
+<div id="aws-educate" class="section level3">
+<h3>AWS Educate</h3>
+<p>Vale ressaltar que os créditos da aws educate, que estudantes de algumas universidades têm acesso, são válidos para configurar pelo menos as partes que eu utilizei (buckets S3, vpc com subnets, roles na iam, batch e instâncias ec2). A única ressalva é que as credenciais fornecidas pela Vocareum expiram em um intervalo de tempo fixo (aproximadamente 3hrs) e se a tarefa posta na fila não for concluida antes do termino desse intervalo, você pode obter o erro “An error occurred (ExpiredTokenException) when calling the DescribeJobs operation: The security token included in the request is expired”. Problema de resolução simples: só acessar e copiar as novas credenciais para o documento ~/.aws/credentials no seu pc, que é automaticamente criado quando o aws cli é instalado.</p>
+<div class="figure">
+<img src="/images/access.png" />
+
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
