@@ -12,5 +12,8 @@ output:
 
 ------
 
+[Metaflow  - Configuração Mínima  - 01/06/2021](./metaflow_setup.html)  
+- Configurando o Metaflow com o mínimo necessário de recursos AWS.
+
 [Tidymodels com Titanic  - 29/01/2021](./tidymodels_titanic.html)  
 - Utilizando Tidymodels para pré-processamento de dados e classificação de sobreviventes numa competição *entry level* do Kaggle.

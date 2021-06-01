@@ -12,14 +12,14 @@ Recentemente, assistindo às conferencias da useR de 2020 descobri o [Metaflow](
 Posto de um modo simples a ideia é permitir que o cientista de dados na etapa de desenvolvimento do modelo não perca muito tempo com o provisionamento de infraestrutura e foque mais em otimização e em fature engineering, por exemplo. Um meio do caminho entre prototipagem e produção. 
 
 
-###Apresentando o Metaflow
+###Metaflow e AWS
 
 A biblioteca é open source,  escrita em Python e compatível com R. Ainda está em desenvolvimento e uma grande quantidade de informação pode ser encontrada nas issues do diretorio no [Github](https://github.com/Netflix/metaflow). *Under the hood*, o Metaflow provê uma API para a stack de recursos na AWS previamente configurados. O código será executado em containers de instâncias EC2, Spot ou Fargate. Essas configurações podem ser feitas manualmente (seguindo [este guia](https://admin-docs.metaflow.org/metaflow-on-aws/deployment-guide/manual-deployment) de deploy) ou por um template do CloudFormation que automatiza o processo. Eu preferi fazer as configs manuais, o template faz o provisionamento de um conjunto completo de serviços para quem quer utilizar todos os recursos do Metaflow, muito além do que eu preciso agora. 
 
 Outro atrativo é que as modificações necessárias no código para a utilização do Metaflow  não são nada complicadas. Um tempo maior é gasto configurando os recursos na AWS que na adaptação do código.
 
 
-###Configuração  Mínima
+###Configurando
 
 Aqui eu vou apresentar um pequeno guia dos passos que segui para conseguir instalar e configurar o Metaflow com uma quantidade reduzida de recursos mas que me permitisse ainda executar o processamento na nuvem.
 
@@ -27,13 +27,17 @@ O primeiro passo é instalar o `awscli`, no Debian se faz normalmente via `apt-g
 
 Em seguida, é necessário copiar suas credenciais AWS para `~/.aws/credentials`, o que vai permitir a autenticação tanto com o awscli quanto com o Metaflow. Fica assim:
 
-![](/images/credentials_f.png)
+![](/images/credentials_f.png)  
+
+
 
 O Metaflow já pode ser instalado com o comando `pip install metaflow`
 
 Agora os tutoriais podem ser baixados com o comando `metaflow tutorials pull`; para listar os tutoriais `metaflow tutorials list`; se tudo estiver certo, o resultado será parecido com isso:
 
-![](/images/tutorials.png)
+![](/images/tutorials.png)  
+
+
 
 No último passo o exemplo mínimo que vamos utilizar para testar se tudo foi configurado corretamente é o  `helloaws.py`.
 
@@ -52,21 +56,26 @@ Resumindo, foi necessário criar:
 
 Um modo de testar o login do awscli é executar a listagem dos buckets S3 com o comando `aws s3api list-buckets`:
 
-![](/images/list_buckets.png)
+![](/images/list_buckets.png)  
+
+
 
 
 se obtiver algum erro de autenticação aqui, será necessário rever suas credenciais editando `~/.aws/credentials`.
 
 Se tudo estiver funcionando corretamente, é hora de executar `metaflow configure aws` e preencher com as ARN's (Amazon Resource Name). Este comando cria o arquivo `config.json` em `~/.metaflowconfig/config.json`. O meu ficou assim:
-![](/images/config_json.png)
+![](/images/config_json.png)  
+
 
 E por fim, para testar o se tudo está OK, eu rodo o tutorial `helloaws`:
-![](/images/all_process.png)
+![](/images/all_process.png)  
 
 ###Simples assim?
 Aqui devo confessar que (por minha culpa)o processo não foi tão direto. Falhei em alguns passos do tutorial de deploy e por várias vezes, ao tentar executar o `helloaws.py`, me peguei assistindo o status RUNNABLE do AWS batch sendo impresso no terminal por alguns minutos antes de me convencer que não sairia disso e cancelar manualmente o job. Em outras tentativas, sem qualquer mudança nas configurações, tudo fluia sem maiores problemas. Verifiquei que a maquina virtual era criada e passei a desconfiar da VPC. Acabei criando um log na CloudWatch para a VPC que estava utilizando e percebi que a intermitência se devia à configuração das subnets. Provavelmente eu negligenciei o parágrafo do guia de deploy que diz **“These subnets are not auto-assigned public IPv4 addresses. Instances launched in the public subnet must be assigned a public IPv4 address to communicate with the Amazon ECS service endpoint.”** Editei a configuração de ip auto-atribuido na sub publica e tudo se resolveu. Até o momento não tive mais o problema.
 
-![](/images/public_ipv4.png)
+![](/images/public_ipv4.png)  
+
+
 
 ###AWS Educate
 
