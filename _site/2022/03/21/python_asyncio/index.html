@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/syntax.css"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Pt1. Capturando feed de dados em tempo real com Python | Dnnes</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Pt1. Capturando feed de dados em tempo real com Python" />
+<meta name="author" content="Dnnes" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="true O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST." />
+<meta property="og:description" content="true O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST." />
+<link rel="canonical" href="http://localhost:4000/2022/03/21/python_asyncio/" />
+<meta property="og:url" content="http://localhost:4000/2022/03/21/python_asyncio/" />
+<meta property="og:site_name" content="Dnnes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-03-21T00:00:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Pt1. Capturando feed de dados em tempo real com Python" />
+<meta name="twitter:site" content="@dnnes" />
+<meta name="twitter:creator" content="@Dnnes" />
+<meta name="google-site-verification" content="xxxxx" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"Dnnes"},"headline":"Pt1. Capturando feed de dados em tempo real com Python","dateModified":"2022-03-21T00:00:00-03:00","datePublished":"2022-03-21T00:00:00-03:00","description":"true O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST.","url":"http://localhost:4000/2022/03/21/python_asyncio/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2022/03/21/python_asyncio/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Dnnes" />
+</head>
+
+
+  <body>
+
+    <div class="container pure-g"><div class="sidebar-left pure-u-1 pure-u-md-1-4" style="background-color: rgb(90, 108, 111); color: rgb(255, 255, 255); background-image: url(/);"><header class="masthead">
+  
+  <div class="masthead-title">
+    <a href="/" title="Home">Dnnes</a>
+  </div>
+  <div class="masthead-tagline">
+    <small></small>
+  </div><nav class="navigation">
+    <ul class="navigation-list"><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/">Blog</a>
+      </li><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/about/">About</a>
+      </li></ul>
+  </nav><div class="social pure-menu pure-menu-horizontal">
+      <ul class="social-icons pure-menu-list">
+      <li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="mailto://diego.nnesf@gmail.com">
+            <i class="fas fa-envelope" title="Email"></i>
+          </a>
+        </li><li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="https://github.com/dnnes">
+            <i class="fab fa-github" title="GitHub"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+</header>
+</div>
+
+      <div class="content pure-u-1 pure-u-md-1-2"><main>
+  <article class="post">
+  <h1 class="post-title">Pt1. Capturando feed de dados em tempo real com Python</h1>
+  <div class="post-meta"><time datetime="2022-03-21T00:00:00-03:00" itemprop="datePublished">21 Mar 2022</time><span> • </span>
+      
+        <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+          Dnnes
+        </span></div>
+
+  <p>true</p>
+
+<p>O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST. <!--more--></p>
+
+<p>Neste primeiro post escreverei sobre o processo de captura dos dados. Nos posts seguintes, falarei sobre a criação da API utilizando AWS Lambda e DynamoDB.</p>
+
+<h3 id="algumas-definições">Algumas definições</h3>
+
+<p>O principal modo do investidor interagir com o mercado de criptoativos atualmente é através de exchanges como a Binance, Ftx, Coinbase, Bitfinex, Bitstamp e muitas outras. Pelo app da exchange o trader pode colocar instruções [lerry harris] indicando o tipo de ativo, o par de moeda, a quantidade e qual lado da negociação (compra ou venda) deseja tomar. Essas instruções são as ordens (orders). O investidor pode colocar, por exemplo, uma ordem de compra de 10 unidades no par btcusd para quando o preço chegar a U$40000. Esse tipo de negociação é chamada de <em>limit order</em> e só será executada se o preço de venda chegar nesse nível e se houver liquidez (um número suficiente de vendedores) para preencher a ordem. Quando o investidor deseja execução imediata, faz um <em>market order</em>: define a quantidade e o par, o preço da execução será o melhor preço de venda disponível no momento até a ordem ser totalmente preenchida.</p>
+
+<p>Cada ordem colocada no mercado é a expressão das crenças de um investidor sobre aquele determinado ativo, no curto ou longo prazo. Se ele acha que o preço sobe, então coloca uma ordem de compra; se acha que o preço cai, vende. Essas ordens, enquanto estão ativas, compõem o order book da exchange.</p>
+
+<p>Boa parte das exchanges fornecem api’s do feed de alguns dados em tempo <em>quasi</em> real. Porém, não são todas que fornecem os dados do order book na menor granularidade possível, ordem a ordem. Esse post diz um pouco mais sobre os níveis do order book: <a href="https://blog.kaiko.com/tick-level-order-books-technical-overview-and-documentation-56b1ab6e7c10">Kaiko</a></p>
+
+<p>A Bitstamp é uma das poucas que disponibiliza os dados detalhados. Podemos enxergar cada ordem de bid/ask adicionada, atualizada ou deletada do livro. Ter acesso à esses dados possibilita analizar e testar hipoteses sobre a formação dos preços, buscar oportunidades de arbitragem e desenvolver estratégias de HST (high speed trading). O primeiro passo, no entanto, é capturar esses dados e inseri-los em um banco de dados.</p>
+
+<h3 id="capturando-os-dados">Capturando os dados</h3>
+
+<p>As API’s em tempo real geralmente são disponibilizadas em Websocket. Websocket é um protocolo criado sobre a camada TCP e que se inicia através do protocolo HTTP tornando possível uma comunicação ponto a ponto em ambos os sentidos cliente-servidor. A conexão é iniciada com uma request disparada para o endereço do host com o HTTP <em>verb</em> GET. Em seguida um cabeçalho de upgrade é enviado do cliente para o servidor, acontece o handshake e a conexão se firma (linhas 6 a 8 da imagem a seguir).</p>
+
+<p>Com a conexão estabelecida, agora existe um canal entre o cliente e o servidor na mesma porta utilizada pelo protocolo HTTP (80) ou na porta 443. É através deste canal que acontece a trasmissão de menssagens.</p>
+
+<p>No caso da aplicação explicada neste post, a primeira mensagem é enviada para o host e contém um item json com o pedido de inscrição a um canal (linha 22).</p>
+
+<p>O servidor devolve uma resposta com o status do pedido (linha 25) e partindo daí se incia a transmissão de dados.</p>
+
+<p>Os detalhes do websocket são explicados aqui na <a href="https://datatracker.ietf.org/doc/html/rfc6455">documentação tecnica</a></p>
+
+<p>Os eventos no order book são expressos em milisegundos e chegam pelo feed com o atraso da latência (~100ms no caso do teste) e mais algum overhead do código (linha 34 em diante).</p>
+
+<p><img src="/assets/log_2022-03-15.png" alt="" /> <em>Trecho do log gerado ao iniciar a aplicação</em></p>
+
+<p>Para ter uma boa integridade na recepção e no armazenamento dos dados, de início eu imaginei duas condições que o código deveria atender: <strong>primeiro</strong> a recuperação após uma perda de conexão ou exception deveria ser rápida. <strong>Segundo</strong>: a recepção dos dados não poderia ser limitada por outras funções do programa, como por exemplo, ser suspensa porque o event loop principal está ocupado com gravação no banco de dados.</p>
+
+<p>Para o primeiro problema eu esperava que os próprios timeouts da biblioteca Websockets dessem conta de emergir um erro, já que existe o parâmetro keep_alive na criação da conexão.</p>
+
+<p>Para o segundo, a minha ideia original era criar uma <em>thread</em> e uma conexão separada para cada canal.</p>
+
+<h3 id="python-e-asyncio">Python e asyncio</h3>
+
+<p>O código do projeto é baseado na biblioteca <a href="https://websockets.readthedocs.io/en/stable/">Websockets</a> e na <a href="https://docs.python.org/3/library/asyncio.html">asyncio</a>. A biblioteca asyncio foi introduzida no Python 3.4 e bastante aprimorada até o Python 3.9. Considerando que o Python é uma linguagem single thread, a asyncio implementa uma api que possibilita atribuir operações de I/O (entrada e saida de dados) a corrotinas e tasks e essas podem ser executadas em concorrência. Isso é possível porque o GIL (Global Interpreter Lock) não bloqueia concorrência em operações <em>io-bound</em>. Ja no caso de operações que são dependentes do CPU (<em>cpu-bound</em>), o único modo de atingir concorrência é criando multiprocessos.</p>
+
+<p>Existe uma série de cuidados que devem ser tomados ao lidar com concorrência em Python. Para aplicações críticas e que necessitam de baixa latência o ideal é utilizar linguagens que não possuem tantas limitações nesse sentido (C, C++, Java, Erlang, Elixir…), caso contrário é necessário ter sempre em mente que existe um overhead ao utilizar multiplas threads e processos e ainda compartilhar variáveis entre eles.</p>
+
+<p>Aqui isso não faz tanta diferença. A preocupação principal é garantir que não haja bloqueio do loop que recebe as mensagens e para isso a asyncio é suficiente. E olhando esse gráfico do livro <a href="https://www.amazon.com.br/High-Performance-Python-Micha-Gorelik/dp/1492055026/">High Performance Python</a>, podemos ter uma noção que o poder de processamento está bem acima da velocidade de i/o:</p>
+
+<blockquote>
+  <p><strong>“For example, in the time it takes to write to a network socket, an operation that typically takes about 1 millisecond, we could have completed 2,400,000 instructions on a 2.4 GHz computer. Worst of all, our program is halted for much of this 1 millisecond of time—our execution is paused, and then we wait for a signal that the write opera‐ tion has completed. This time spent in a paused state is called I/O wait.”</strong></p>
+</blockquote>
+
+<p><img src="/assets/High_performance_python.png" alt="&quot;Banda das interfaces&quot;" />
+Outro livro que me ajudou muito nesse processo de trabalhar com a asyncio foi o <a href="https://www.amazon.com.br/Python-Concurrency-Asyncio-Matthew-Fowler/dp/1617298662">Python Concurrency with Asyncio</a>. Esse livro cobre com detalhes as possibilidades que temos hoje em paralelismo, concorrência e multitarefas no Python com uma riqueza grande de exemplos que permitem entender bem como a biblioteca trabalha.</p>
+
+<h3 id="o-código">O código</h3>
+
+<p>O código completo está <a href="https://github.com/dnnes/Websocket-streams/">aqui</a>. Neste tópico irei comentá-lo por partes.
+Utilizando o sdk da AWS para python, a biblioteca <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/index.html"><code class="language-plaintext highlighter-rouge">boto3</code></a>, eu defini o caminho para a tabela do DynamoDB nas linhas 3 e 4 do gist abaixo. Em seguida vem as configuraçeõs de logging. Aqui é necessário tomar cuidado, quando em modo <code class="language-plaintext highlighter-rouge">DEBUG</code> o arquivo de log chega aos GB em poucos minutos. É preferível utilizar o modo <code class="language-plaintext highlighter-rouge">INFO</code>.</p>
+
+<p>O função <code class="language-plaintext highlighter-rouge">to_db()</code> deve ser implementada para fazer a inserção das menssagens no database. Essa função é executada em um processo diferente (linhas 16 e 17). Para comunicar o programa principal com a função do banco de dados eu tinha duas opções: usar um <a href="https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Pipe">Pipe()</a> e conectar a função handler com a <code class="language-plaintext highlighter-rouge">to_db()</code>, ou utilizar esse <a href="https://docs.python.org/3/library/multiprocessing.html#managers">Manager</a>, que permite compartilhar um espaço de memória entre dois ou mais processos diferentes e usar uma Queue(), que era a opção mais adequada já que as menssagens poderiam ser empilhadas na queue enquanto as operações do banco de dados eram concluidas.</p>
+
+<p>É necessário informar qual o endereço do host e adicionar a uma lista as mensagens de subscribe no formato JSON ao instanciar a classe GetStream. Essas informações estão na docomentação de cada <a href="https://www.bitstamp.net/websocket/v2/">API</a>. Há casos onde a inscrição é feita diretamente pela url do websocket. Neste caso a lista de canais pode ficar vazia. Aqui no exemplo a inscrição será feita em 4 canais. O loop principal é invocado com o método <code class="language-plaintext highlighter-rouge">initiate()</code></p>
+
+<script src="https://gist.github.com/dnnes/1b55b5ad7815f14a0577ae053e72843e.js"></script>
+
+<p>A construção e inicialização do objeto é feita a seguir. É interessante notar que a exception do tipo <code class="language-plaintext highlighter-rouge">KeyboardInterrupt</code> não é capturada em nenhuma outra função, apenas na mais “externa”. Neste caso, a função que cria o event loop.
+Esse comportamento é discutido em maiores detalhes <a href="https://github.com/python/asyncio/issues/341">nessa issue</a>. Uma das grandes lições aprendidas com a asyncio é que nem sempre o error handling acontece como esperamos. Com alguma pesquisa consegui contornar os problemas e achei posts interessantes sobre o assunto, como esse da <a href="https://quantlane.com/blog/ensure-asyncio-task-exceptions-get-logged/">Qantlane</a>.</p>
+
+<script src="https://gist.github.com/dnnes/1531b295e978015c0ddee4fe2759f43d.js"></script>
+
+<p>O pedido de conexão é feito em um <code class="language-plaintext highlighter-rouge">async for</code> (linha 4) dentro da classe <code class="language-plaintext highlighter-rouge">GetStream</code>. Em caso de <em>exception</em> nas corrotinas, o erro será capturado no error handler do método <code class="language-plaintext highlighter-rouge">connect_ws</code> e automaticamente irá tentar a reconexão. O método <code class="language-plaintext highlighter-rouge">to_thread</code> pertence à biblioteca <code class="language-plaintext highlighter-rouge">asyncio</code>. É um wrapper que permite de modo rápido definir que uma corrotina será executada em uma thread separada. O método <code class="language-plaintext highlighter-rouge">gather</code> garante que as duas <em>tasks</em> serão executadas ao mesmo tempo. Esse método só retorna quando ambas as <em>tasks</em> são finalizadas (status <code class="language-plaintext highlighter-rouge">done</code>). Como são dois loops, isso só acontece em caso de erro.</p>
+
+<script src="https://gist.github.com/dnnes/07de7e7d63d314ca5056710d80945121.js"></script>
+
+<p>Para vigiar a conexão, as funções built-in da biblioteca Websockets eram muito lentas. Demoravam de 20 a 30 segundos para levantar um TimeoutError mesmo quando setadas para 1 segundo (é exatamente esse tipo de comportamento imprevisível que é tratado no post da Quantlane linkado acima). Por conta disso eu implementei a <code class="language-plaintext highlighter-rouge">get_echo()</code>, que envia uma mensagem Ping e espera uma resposta com timeout ajustável. Se não obtiver resposta, o erro é logado e chega ao loop da conexão onde irá iniciar a tentativa de reconexão. Se receber a resposta do servidor (Pong) a função dorme por um segundo (sem bloquear o loop) e então reinicia.</p>
+
+<p>A <code class="language-plaintext highlighter-rouge">stream_handler</code> é executado em uma thread separada. Ela recebe as mensagens do método recv() e empilha na queue - o <code class="language-plaintext highlighter-rouge">async for message in ws:</code> é um wrapper ao redor da recv() . Essa queue então alimenta o processo separado <code class="language-plaintext highlighter-rouge">to_db()</code> e as mensagens são enviadas para o banco de dados através do método <code class="language-plaintext highlighter-rouge">put()</code> da biblioteca <code class="language-plaintext highlighter-rouge">boto3</code>.
+A própria library Websockets ao receber as mensagens também as coloca em uma queue, <a href="https://github.com/aaugustin/websockets/blob/498cc8c061e53f0001cb2e3ade22ee8ce5ff11a1/src/websockets/legacy/protocol.py#L113-L122">lendo o código entendi</a> como funciona em um nível mais baixo da API: cada mensagem que chega é adicionada na fila e fica à espera da chamada do metodo recv. Se acumular mensagens, a fila deixa de ser alimentada (daí a minha preocupação de receber as mensagens em um processo independente) e as primeiras mensagens são mantidas na espera até serem processadas (modelo FIFO).</p>
+
+<script src="https://gist.github.com/dnnes/896d5bdbdd7d0b858c37fc9616d71d5f.js"></script>
+
+<p>Eu desisti da ideia inicial de criar uma conexão para cada canal. A ideia não era boa: consome mais recursos da máquna virtual e as exchanges limitam a quantidade de conexões por cliente. Faz sentido, já que cada mensagem tem aproximadamente 200 bytes e é muito mais oneroso para o servidor criar uma nova conexão que adicionar um feed à uma conexão já existente.</p>
+
+<p>Esse código é executado em uma instância EC2 com 1GB de ram e alimenta uma tabela do DynamoDB, escreverei sobre no próximo post. Ainda é necessário executar alguns experimentos de profiling para obter as dimensões reais dos recursos utilizados e dos tempos de execução neste script.</p>
+
+
+  
+    
+      <div class="post-tags-section">
+  <i class="post-tags-icon fas fa-tags"></i>
+  <ul class="post-tags"><li>
+        <a class="post-tag" href="/tags/#python">python</a></li><li>
+        <a class="post-tag" href="/tags/#dynamodb">dynamodb</a></li><li>
+        <a class="post-tag" href="/tags/#asyncio">asyncio</a></li><li>
+        <a class="post-tag" href="/tags/#aws">aws</a></li><li>
+        <a class="post-tag" href="/tags/#serverless">serverless</a></li><li>
+        <a class="post-tag" href="/tags/#websockets">websockets</a></li></ul>
+</div>
+
+  
+
+  
+</article>
+
+
+<aside class="related">
+  <h2>Related posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <a href="/2022/04/02/api_lambda/">
+          Pt2. Construindo uma API REST com o AWS Lambda
+          <small><time datetime="2022-04-02T00:00:00-03:00">02 Apr 2022</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2021/11/12/regressao_logistica/">
+          Regressão logística por gradient ascent
+          <small><time datetime="2021-11-12T00:00:00-03:00">12 Nov 2021</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2021/06/01/metaflow-setup/">
+          Metaflow  - Configuração Mínima
+          <small><time datetime="2021-06-01T08:08:25-03:00">01 Jun 2021</time></small>
+        </a>
+      </li>
+    
+  </ul>
+</aside>
+
+
+</main>
+
+<footer class="footer"><small>
+    &copy; 2021&nbsp;-&nbsp;2022 <a href="https://github.com/dnnes/">Dnnes</a>. All rights reserved.
+    Powered by <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://github.com/vszhub/not-pure-poole">Not Pure Poole</a>.
+  </small>
+</footer>
+</div>
+      <div class="sidebar-right pure-u-1 pure-u-md-1-4">
+<div  class="toc-wrapper">
+  <h2 class="toc-title">Tópicos</h2>
+    <nav class="toc-nav">
+      <ul class="toc">
+  <li><a href="#algumas-definições">Algumas definições</a></li>
+  <li><a href="#capturando-os-dados">Capturando os dados</a></li>
+  <li><a href="#python-e-asyncio">Python e asyncio</a></li>
+  <li><a href="#o-código">O código</a></li>
+</ul>
+
+  </nav>
+</div>
+
+</div>
+    </div>
+
+    <script async src="https://use.fontawesome.com/releases/v5.0.12/js/all.js"></script><script>
+  function strip(str, remove) {
+    while (str.length > 0 && remove.indexOf(str.charAt(0)) != -1) {
+      str = str.substr(1);
+    }
+    while (str.length > 0 && remove.indexOf(str.charAt(str.length - 1)) != -1) {
+      str = str.substr(0, str.length - 1);
+    }
+    return str;
+  }
+
+  function scroll() {
+    console.log('scroll');
+    window.scrollTo({
+      left: 0, 
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+    sessionStorage.removeItem('forceCheckScroll');
+  }
+
+  const forceCheckScroll = sessionStorage.getItem('forceCheckScroll') === 'true';
+  const checkScroll = strip(window.location.pathname, '/') !== strip('', '/');
+
+  if (forceCheckScroll || checkScroll) {
+    const maxWidth = "(max-width: 48rem)";
+    const result = window.matchMedia(maxWidth);
+    if (result.matches) {
+      scroll();
+    } else {
+      result.addListener((match) => {
+        if (match.media == maxWidth) {
+          if (match.matches) {
+            scroll();
+          }
+        }
+      });
+    }
+  }
+</script>
+</body>
+</html>

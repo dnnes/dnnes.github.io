@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/syntax.css"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Regressão logística por gradient ascent | Dnnes</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Regressão logística por gradient ascent" />
+<meta name="author" content="Dnnes" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Neste post eu tento criar uma visualização que ajuda a entender como a regressão logística aprende a fronteira de decisão em um conjunto de dados." />
+<meta property="og:description" content="Neste post eu tento criar uma visualização que ajuda a entender como a regressão logística aprende a fronteira de decisão em um conjunto de dados." />
+<link rel="canonical" href="http://localhost:4000/2021/11/12/regressao_logistica/" />
+<meta property="og:url" content="http://localhost:4000/2021/11/12/regressao_logistica/" />
+<meta property="og:site_name" content="Dnnes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-11-12T00:00:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Regressão logística por gradient ascent" />
+<meta name="twitter:site" content="@dnnes" />
+<meta name="twitter:creator" content="@Dnnes" />
+<meta name="google-site-verification" content="xxxxx" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"Dnnes"},"headline":"Regressão logística por gradient ascent","dateModified":"2021-11-12T00:00:00-03:00","datePublished":"2021-11-12T00:00:00-03:00","description":"Neste post eu tento criar uma visualização que ajuda a entender como a regressão logística aprende a fronteira de decisão em um conjunto de dados.","url":"http://localhost:4000/2021/11/12/regressao_logistica/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2021/11/12/regressao_logistica/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Dnnes" />
+</head>
+
+
+  <body>
+
+    <div class="container pure-g"><div class="sidebar-left pure-u-1 pure-u-md-1-4" style="background-color: rgb(90, 108, 111); color: rgb(255, 255, 255); background-image: url(/);"><header class="masthead">
+  
+  <div class="masthead-title">
+    <a href="/" title="Home">Dnnes</a>
+  </div>
+  <div class="masthead-tagline">
+    <small></small>
+  </div><nav class="navigation">
+    <ul class="navigation-list"><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/">Blog</a>
+      </li><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/about/">About</a>
+      </li></ul>
+  </nav><div class="social pure-menu pure-menu-horizontal">
+      <ul class="social-icons pure-menu-list">
+      <li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="mailto://diego.nnesf@gmail.com">
+            <i class="fas fa-envelope" title="Email"></i>
+          </a>
+        </li><li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="https://github.com/dnnes">
+            <i class="fab fa-github" title="GitHub"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+</header>
+</div>
+
+      <div class="content pure-u-1 pure-u-md-1-2"><main>
+  <article class="post">
+  <h1 class="post-title">Regressão logística por gradient ascent</h1>
+  <div class="post-meta"><time datetime="2021-11-12T00:00:00-03:00" itemprop="datePublished">12 Nov 2021</time><span> • </span>
+      
+        <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+          Dnnes
+        </span></div>
+
+  <p>Neste post eu tento criar uma visualização que ajuda a entender como a regressão logística aprende a fronteira de decisão em um conjunto de dados. <!--more--></p>
+
+<h3 id="o-problema-da-classificação">O Problema da classificação</h3>
+
+<p>Podemos entender as técnicas de aprendizado supervisionado de máquina, de um modo bem amplo, como um conjunto de métodos empregados em dados para solucionar dois tipos de problemas: regressão e classificação.</p>
+
+<p>Os modelos de classificação são utilizados quando a variável resposta é categórica. Assim, o modelo de regressão linear, por exemplo, se torna impróprio para realizar a classificação já que sua variável resposta é contínua.</p>
+
+<p>O modelo de regressão logística é uma técnica bastante empregada e uma das mais conhecidas entre os modelos paramétricos supervisionados de classificação (obs: possui regressão no nome porém é utilizada para predizer variáveis categóricas), trata-se de um modelo linear com uma variável binária de resposta.</p>
+
+<p>A intenção aqui é entender como os parâmetros da regressão logística são obtidos e então visualizar o procedimento da maximização da função de verossimilhança (likelihood), resolvendo programaticamente com o R as operações de álgebra linear e aplicando a técnica de otimização convexa por gradiente (gradiente ascendente, neste caso).</p>
+
+<h2 id="a-função-logística-e-probabilidade-das-classes">A função logística e probabilidade das classes</h2>
+
+<p>A função logística, também conhecida com sigmoid, nos permite conter os resultados de uma função linear entre 0 e 1. É esta função que recebe os parâmetros e variáveis na regressão logística e retorna as probabilidades de determinada observação do conjunto de dados pertencer a uma das classes.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sigmoid</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="m">1</span><span class="o">/</span><span class="p">(</span><span class="m">1</span><span class="o">+</span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="n">score</span><span class="p">))</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="n">score</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sigmoid</span><span class="p">(</span><span class="m">-5</span><span class="o">:</span><span class="m">5</span><span class="p">)</span><span class="w">
+</span><span class="n">plot</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">-5</span><span class="p">,</span><span class="m">-4</span><span class="p">,</span><span class="m">-3</span><span class="p">,</span><span class="m">-2</span><span class="p">,</span><span class="m">-1</span><span class="p">,</span><span class="m">0</span><span class="p">,</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">,</span><span class="m">5</span><span class="p">),</span><span class="w"> </span><span class="n">score</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"l"</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p><img src="/assets/sigmoid.png" alt="" /></p>
+
+<p>Na regressão logística, a probabilidade de uma observação do conjunto de dados pertencer à classe 1 condicionada conjuntamente pela matriz de variáveis <em>X</em> e pelo vetor de parâmetros <em>θ</em> - a probabilidade <em>a posteriori</em> - é dada por.</p>
+
+\[P(Y = 1| X, \theta) = \frac{1}{(1+\exp^{-\theta^T x})}\]
+
+<p>onde o score é o produto escalar entre o vetor de parâmetros e a matrix de variáveis (aqui levando em conta o intercepto <em>x</em><sub>0</sub> = 1):</p>
+
+<p>\(\theta^Tx = \theta_0 + \sum_{i=1}^{m}\theta_i x_i\)
+a implementação fica assim:</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sigmoid</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="w"> </span><span class="n">X</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="m">1</span><span class="o">/</span><span class="p">(</span><span class="m">1</span><span class="o">+</span><span class="p">(</span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">X</span><span class="w"> </span><span class="o">%*%</span><span class="w"> </span><span class="n">theta</span><span class="p">))))</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="a-estimação-dos-parâmetros">A estimação dos parâmetros</h2>
+
+<p>Os parâmetros são obtidos pela otimização da função da likelihood. O objetivo é escolher coeficientes <em>θ</em> que maximizam:</p>
+
+\[L(\theta) = \prod_i^n P(y_i|X_i, \theta)\]
+
+<p>Tomar o logaritimo da função facilita a manipulação daqui pra frente. O produtório se torna somatório e as operações com o exponencial se tornam mais simples:</p>
+
+\[LL(\theta)=\sum_{i=1}^{n}lnP(y_i|x_i,X_i,\theta)\]
+
+<p>A função de log likelihood (log da verossimilhança) da regressão logística então tem a seguinte forma, onde <em>y</em><sub><em>i</em></sub> pode assumir os valores do conjunto discreto {0,1}, o primeiro termo, como já vimos, é a probabilidade de <em>y</em><sub><em>i</em></sub> assumir o valor 1 e o segundo termo é a probabilidade de <em>y</em><sub><em>i</em></sub> assumir o valor 0:</p>
+
+<p>\begin{align} LL(\theta)&amp;= y_i ln\frac{1}{(1+\exp^{-\theta^T x})}+(1-y_i)ln\frac{exp^{-\theta^Tx}}{(1+exp^{-\theta^T x})} \newline &amp;= \sum_{i=1}^{n}{(y_i-1)\theta^Tx_i - ln(1+exp^{\theta^Tx_i})} \end{align}</p>
+
+<p>A implementação pode ser feita da seguinte forma, notem q o produto escalar de X e theta equivale ao produto escalar da transposta de theta com x:</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">loglikelihood</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">theta</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">score</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">X</span><span class="w"> </span><span class="o">%*%</span><span class="w"> </span><span class="n">theta</span><span class="w">
+  </span><span class="n">logexp</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="m">1</span><span class="o">+</span><span class="nf">exp</span><span class="p">(</span><span class="o">-</span><span class="n">score</span><span class="p">))</span><span class="w">
+  </span><span class="nf">sum</span><span class="p">((</span><span class="n">y</span><span class="m">-1</span><span class="p">)</span><span class="o">*</span><span class="n">score</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">logexp</span><span class="p">)</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="gradient-steps">Gradient steps</h2>
+
+<p>O logaritimo da função de likelihood é uma função convexa. O objetivo então é encontrar o ponto máximo desta função à partir de sua derivada, atualizando o valor dos coeficientes (theta) a cada iteração até atingir a convergência. É esperado que a cada iteração o valor da função log-likelihood aumente até “estabilizar”.</p>
+
+<p>O gradiente nos dá a “direção” do máximo da função. Precisamos obter a derivada desta função nos coeficientes e então aproximar a derivada para zero.</p>
+
+\[\frac{\partial ll(\theta)}{\partial \theta_j} = \sum_{i=1}^{N}x_i(y_i- \frac{1}{(1+\exp^{-\theta^T x})})\]
+
+<p>A equação a seguir nos mostra a atualização dos coeficientes a cada iteração.
+O eta(<em>η</em>) é o tamanho do passo que damos na direção (gradiente) do ponto de otimização do coeficiente theta <strong>j</strong>. Também é chamado de learning rate e é um parâmetro de extrema importância, já que dependendo de sua magnitude a convergência torna-se muito demorada ou até impossível. Aqui ele será escolhido de forma arbitrária e fixo em todas as iterações, porém existem diversos métodos que podem ser encontrados na literatura de otimização que tratam só da escolha do learning rate adaptativo.</p>
+
+<p>O sobrescrito t indica que o theta atual é uma atualização do theta obtido na iteração anterior t-1.
+\(\theta_j^{t} = \theta_j^{t-1} +  \eta\frac{\partial ll(\theta^{t-1})}{\partial \theta_j^{t-1}}\)
+ Tanto a derivação quanto a atualização dos thetas serão implementados na função que chamei de <em>gradient</em>. A cada iteração os thetas estimados e o likelihood serão armazenados no data frame <code class="language-plaintext highlighter-rouge">df_bystep</code>.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gradient</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">Y</span><span class="p">,</span><span class="w"> </span><span class="n">theta</span><span class="p">,</span><span class="w"> </span><span class="n">step_size</span><span class="p">,</span><span class="w"> </span><span class="n">iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">y</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">X</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">  </span><span class="n">dplyr</span><span class="o">::</span><span class="n">select</span><span class="p">(</span><span class="n">all_of</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span><span class="w">
+  </span><span class="n">mtx</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">X</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">  </span><span class="n">dplyr</span><span class="o">::</span><span class="n">select</span><span class="p">(</span><span class="o">-</span><span class="n">all_of</span><span class="p">(</span><span class="n">Y</span><span class="p">))</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> </span><span class="n">mutate</span><span class="p">(</span><span class="n">intercept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> </span><span class="n">as.matrix</span><span class="p">()</span><span class="w">
+  
+  </span><span class="n">derivative</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">()</span><span class="w">
+  </span><span class="n">df_bystep</span><span class="w">  </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">()</span><span class="w">
+  
+  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="n">iter</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="w"> </span><span class="n">mtx</span><span class="p">))</span><span class="w">
+    
+    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="n">ncol</span><span class="p">(</span><span class="n">mtx</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">derivative</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">sum</span><span class="p">(</span><span class="n">mtx</span><span class="p">[,</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">e</span><span class="p">)</span><span class="w">
+      </span><span class="n">theta</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">theta</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">step_size</span><span class="o">*</span><span class="n">derivative</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    
+    </span><span class="n">llkh</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">loglikelihood</span><span class="p">(</span><span class="n">mtx</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">theta</span><span class="p">)</span><span class="w">
+    </span><span class="n">df_bystep</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rbind</span><span class="p">(</span><span class="n">df_bystep</span><span class="p">,</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="w"> </span><span class="n">llkh</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">))</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+  </span><span class="nf">names</span><span class="p">(</span><span class="n">df_bystep</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">colnames</span><span class="p">(</span><span class="n">mtx</span><span class="p">),</span><span class="w"> </span><span class="s2">"loglikelihood"</span><span class="p">,</span><span class="w"> </span><span class="s2">"iteration"</span><span class="p">)</span><span class="w">
+  </span><span class="n">df_bystep</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h2 id="visualizando-o-gradient-ascent">Visualizando o gradient ascent</h2>
+
+<p>Por fim, todas as funçoes que foram implementadas até aqui serão executadas para realizar uma classificação de dados.</p>
+
+<p>Os dados utilizados serão bem simplificados: duas variáveis (<strong>a</strong> e <strong>b</strong>) com observações que podem pertencer a duas classes (<strong>0</strong> e <strong>1</strong>) geradas por um processo aleatório normalmente distribuido. A intenção é facilitar a visualização do ajuste do hiperplano.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">set.seed</span><span class="p">(</span><span class="m">123</span><span class="p">)</span><span class="w">
+</span><span class="n">a1</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="m">1000</span><span class="p">,</span><span class="w"> </span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="m">5</span><span class="p">))</span><span class="w">
+</span><span class="n">b1</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="m">1000</span><span class="p">,</span><span class="w"> </span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="m">0.5</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> </span><span class="n">cbind</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="n">classe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1</span><span class="p">)</span><span class="w">
+
+</span><span class="n">a0</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="m">1000</span><span class="p">,</span><span class="w"> </span><span class="m">20</span><span class="p">,</span><span class="w"> </span><span class="m">5</span><span class="p">))</span><span class="w">
+</span><span class="n">b0</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rnorm</span><span class="p">(</span><span class="m">1000</span><span class="p">,</span><span class="w"> </span><span class="m">1</span><span class="p">,</span><span class="w"> </span><span class="m">0.5</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> </span><span class="n">cbind</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">.</span><span class="p">,</span><span class="w"> </span><span class="n">classe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="p">)</span><span class="w">
+
+</span><span class="n">df</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="w"> </span><span class="n">a0</span><span class="p">),</span><span class="w"> 
+                 </span><span class="n">rbind</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span><span class="w"> </span><span class="n">b0</span><span class="p">))</span><span class="w">
+
+
+</span><span class="n">ggplot</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">geom_point</span><span class="p">(</span><span class="n">aes</span><span class="p">(</span><span class="w"> </span><span class="n">colour</span><span class="o">=</span><span class="w"> </span><span class="n">factor</span><span class="p">(</span><span class="n">classe</span><span class="p">)))</span><span class="o">+</span><span class="w">
+  </span><span class="n">xlim</span><span class="p">(</span><span class="m">-20</span><span class="p">,</span><span class="w"> </span><span class="m">+40</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">ylim</span><span class="p">(</span><span class="m">-10</span><span class="p">,</span><span class="m">12</span><span class="p">)</span><span class="o">+</span><span class="w">
+  </span><span class="n">labs</span><span class="p">(</span><span class="n">colour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"classe"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="o">+</span><span class="w">
+  </span><span class="n">theme</span><span class="p">(</span><span class="n">legend.position</span><span class="o">=</span><span class="s2">"bottom"</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p><img src="/assets/random-dataset.png" alt="" /></p>
+
+<p>Os parâmetros passados para a função são: conjunto de dados, nome da variável de interesse, coeficientes theta iniciais, step size e quantidade de iterações:</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gd</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">gradient</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="w"> </span><span class="s2">"classe"</span><span class="p">,</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span><span class="m">0</span><span class="p">,</span><span class="m">0</span><span class="p">),</span><span class="w"> </span><span class="m">0.0003</span><span class="p">,</span><span class="w"> </span><span class="m">200</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>O objeto gd agora armazena um data frame com informaçẽos de cada uma das iterações, <strong>a</strong> e <strong>b</strong> e <strong>intercept</strong> são coeficientes obtidos naquela iteração, loglikelihood é a verossimilhança obtida:</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tail</span><span class="p">(</span><span class="n">gd</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>##              a         b intercept loglikelihood iteration
+## 195 -0.4914219 -1.322780  4.913247     -118.9108       195
+## 196 -0.4185990 -1.322451  4.925506     -116.6961       196
+## 197 -0.4899070 -1.328619  4.925460     -118.0654       197
+## 198 -0.4205768 -1.328425  4.937352     -116.1138       198
+## 199 -0.4883971 -1.334411  4.937538     -117.2564       199
+## 200 -0.4225749 -1.334352  4.949062     -115.5454       200
+</code></pre></div></div>
+
+<p>Partindo daqui fica fácil visualizar o processo. Eu utilizei o pacote <code class="language-plaintext highlighter-rouge">gganimate</code> para gerar as animações e depois juntei todas as gifs em uma imagem só. O resultado é esse:</p>
+
+<p><img src="/assets/Animacao_gradient.gif" alt="" /></p>
+
+<p>No primeiro quadro vemos a fronteira de decisão se ajustando, podemos perceber como o intercepto funciona como um “centro de massa” do hiperplano; no segundo, o algoritmo converge para os thetas ótimos e no terceiro a função de log likelihood caminha para seu máximo.</p>
+
+<p>Esse zigue-zague se deve ao <strong>eta</strong>. Se escolhermos um step size menor, o caminho se torna mais liso, porém a convergência é bem mais lenta.</p>
+
+<h2 id="considerações">Considerações</h2>
+
+<p>A otimização por gradient raramente é utilizado na regressão logística em pacotes estatísticos/machine learning. No capítulo 4 do “The elements of statistical learning”, os autores discutem algumas técnicas que se aproximam do que é utilizado no mundo real.
+Porém, mesmo se tratando de uma técnica simples, podemos através dela compreender os conceitos gerais do classificador binário e o exercício de implementar um conceito é sempre desafiador.</p>
+
+<h3 id="código-utilizado-para-gerar-as-animações">Código utilizado para gerar as animações:</h3>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">gganimate</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">dplyr</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">magrittr</span><span class="p">)</span><span class="w">
+
+</span><span class="n">decisionb</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ggplot</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">geom_point</span><span class="p">(</span><span class="n">aes</span><span class="p">(</span><span class="w"> </span><span class="n">colour</span><span class="o">=</span><span class="w"> </span><span class="n">factor</span><span class="p">(</span><span class="n">classe</span><span class="p">)))</span><span class="o">+</span><span class="w">
+  </span><span class="n">xlim</span><span class="p">(</span><span class="m">-20</span><span class="p">,</span><span class="w"> </span><span class="m">+40</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">ylim</span><span class="p">(</span><span class="m">-10</span><span class="p">,</span><span class="m">12</span><span class="p">)</span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_abline</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filter</span><span class="p">(</span><span class="n">gd</span><span class="p">,</span><span class="w"> </span><span class="n">iteration</span><span class="w"> </span><span class="o">&lt;=</span><span class="m">200</span><span class="p">),</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">intercept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">intercept</span><span class="p">,</span><span class="w"> </span><span class="n">slope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">labs</span><span class="p">(</span><span class="n">colour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"classe"</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Decision Boundary"</span><span class="p">,</span><span class="w"> </span><span class="n">subtitle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"iteração {as.integer(frame_time)}"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme</span><span class="p">(</span><span class="n">legend.position</span><span class="o">=</span><span class="s2">"bottom"</span><span class="p">)</span><span class="o">+</span><span class="w">
+  </span><span class="n">transition_time</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span><span class="w">
+
+
+</span><span class="n">anim_decisionb</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">animate</span><span class="p">(</span><span class="n">decisionb</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">850</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">600</span><span class="p">,</span><span class="w"> </span><span class="n">nframes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">200</span><span class="p">,</span><span class="w"> </span><span class="n">end_pause</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">15</span><span class="p">)</span><span class="w">
+</span><span class="n">anim_save</span><span class="p">(</span><span class="s2">"anim_decisionb"</span><span class="p">,</span><span class="w"> </span><span class="n">anim_decisionb</span><span class="p">)</span><span class="w">
+
+
+</span><span class="n">theta</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ggplot</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filter</span><span class="p">(</span><span class="n">gd</span><span class="p">,</span><span class="w"> </span><span class="n">iteration</span><span class="w"> </span><span class="o">&lt;=</span><span class="m">200</span><span class="p">),</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">=</span><span class="n">a</span><span class="p">))</span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_path</span><span class="p">()</span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_point</span><span class="p">()</span><span class="o">+</span><span class="w">
+  </span><span class="n">xlab</span><span class="p">(</span><span class="s2">"theta b"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ylab</span><span class="p">(</span><span class="s2">"theta a"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="o">+</span><span class="w">
+  </span><span class="n">transition_reveal</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span><span class="w">
+
+</span><span class="n">atheta</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">animate</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">425</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">240</span><span class="p">,</span><span class="w">  </span><span class="n">nframes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">200</span><span class="p">,</span><span class="w"> </span><span class="n">end_pause</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">15</span><span class="p">)</span><span class="w">
+</span><span class="n">anim_save</span><span class="p">(</span><span class="s2">"atheta"</span><span class="p">,</span><span class="w"> </span><span class="n">atheta</span><span class="p">)</span><span class="w">
+
+</span><span class="n">llgg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ggplot</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filter</span><span class="p">(</span><span class="n">gd</span><span class="p">,</span><span class="w"> </span><span class="n">iteration</span><span class="w"> </span><span class="o">&lt;=</span><span class="m">200</span><span class="p">),</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">iteration</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">=</span><span class="n">loglikelihood</span><span class="p">))</span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_path</span><span class="p">()</span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_point</span><span class="p">()</span><span class="o">+</span><span class="w">
+  </span><span class="n">xlab</span><span class="p">(</span><span class="s2">"iteração"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ylab</span><span class="p">(</span><span class="s2">"Log-likelihood"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">transition_reveal</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span><span class="w">
+
+</span><span class="n">allgg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">animate</span><span class="p">(</span><span class="n">llgg</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">425</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">240</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">nframes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">200</span><span class="p">,</span><span class="w"> </span><span class="n">end_pause</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">15</span><span class="p">)</span><span class="w">
+</span><span class="n">anim_save</span><span class="p">(</span><span class="s2">"allgg"</span><span class="p">,</span><span class="w"> </span><span class="n">allgg</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+
+  
+    
+      <div class="post-tags-section">
+  <i class="post-tags-icon fas fa-tags"></i>
+  <ul class="post-tags"><li>
+        <a class="post-tag" href="/tags/#python">python</a></li><li>
+        <a class="post-tag" href="/tags/#dynamodb">dynamodb</a></li><li>
+        <a class="post-tag" href="/tags/#asyncio">asyncio</a></li><li>
+        <a class="post-tag" href="/tags/#aws">aws</a></li><li>
+        <a class="post-tag" href="/tags/#serverless">serverless</a></li></ul>
+</div>
+
+  
+
+  
+</article>
+
+
+<aside class="related">
+  <h2>Related posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <a href="/2022/04/02/api_lambda/">
+          Pt2. Construindo uma API REST com o AWS Lambda
+          <small><time datetime="2022-04-02T00:00:00-03:00">02 Apr 2022</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2022/03/21/python_asyncio/">
+          Pt1. Capturando feed de dados em tempo real com Python
+          <small><time datetime="2022-03-21T00:00:00-03:00">21 Mar 2022</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2021/06/01/metaflow-setup/">
+          Metaflow  - Configuração Mínima
+          <small><time datetime="2021-06-01T08:08:25-03:00">01 Jun 2021</time></small>
+        </a>
+      </li>
+    
+  </ul>
+</aside>
+
+
+</main>
+
+<footer class="footer"><small>
+    &copy; 2021&nbsp;-&nbsp;2022 <a href="https://github.com/dnnes/">Dnnes</a>. All rights reserved.
+    Powered by <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://github.com/vszhub/not-pure-poole">Not Pure Poole</a>.
+  </small>
+</footer>
+</div>
+      <div class="sidebar-right pure-u-1 pure-u-md-1-4">
+</div>
+    </div>
+
+    <script async src="https://use.fontawesome.com/releases/v5.0.12/js/all.js"></script><script>
+  function strip(str, remove) {
+    while (str.length > 0 && remove.indexOf(str.charAt(0)) != -1) {
+      str = str.substr(1);
+    }
+    while (str.length > 0 && remove.indexOf(str.charAt(str.length - 1)) != -1) {
+      str = str.substr(0, str.length - 1);
+    }
+    return str;
+  }
+
+  function scroll() {
+    console.log('scroll');
+    window.scrollTo({
+      left: 0, 
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+    sessionStorage.removeItem('forceCheckScroll');
+  }
+
+  const forceCheckScroll = sessionStorage.getItem('forceCheckScroll') === 'true';
+  const checkScroll = strip(window.location.pathname, '/') !== strip('', '/');
+
+  if (forceCheckScroll || checkScroll) {
+    const maxWidth = "(max-width: 48rem)";
+    const result = window.matchMedia(maxWidth);
+    if (result.matches) {
+      scroll();
+    } else {
+      result.addListener((match) => {
+        if (match.media == maxWidth) {
+          if (match.matches) {
+            scroll();
+          }
+        }
+      });
+    }
+  }
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

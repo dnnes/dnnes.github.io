@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/syntax.css"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Metaflow - Configuração Mínima | Dnnes</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Metaflow - Configuração Mínima" />
+<meta name="author" content="Dnnes" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Recentemente, assistindo às conferencias da useR de 2020 descobri o Metaflow. Dentre várias features oferecidas pela ferramenta desenvolvida na Netflix a proposta principal é tornar possível a prototipagem do código localmente e executar algumas partes na nuvem (apenas o tuning do modelo, por exemplo)" />
+<meta property="og:description" content="Recentemente, assistindo às conferencias da useR de 2020 descobri o Metaflow. Dentre várias features oferecidas pela ferramenta desenvolvida na Netflix a proposta principal é tornar possível a prototipagem do código localmente e executar algumas partes na nuvem (apenas o tuning do modelo, por exemplo)" />
+<link rel="canonical" href="http://localhost:4000/2021/06/01/metaflow-setup/" />
+<meta property="og:url" content="http://localhost:4000/2021/06/01/metaflow-setup/" />
+<meta property="og:site_name" content="Dnnes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-06-01T08:08:25-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Metaflow - Configuração Mínima" />
+<meta name="twitter:site" content="@dnnes" />
+<meta name="twitter:creator" content="@Dnnes" />
+<meta name="google-site-verification" content="xxxxx" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"Dnnes"},"headline":"Metaflow - Configuração Mínima","dateModified":"2021-06-01T08:08:25-03:00","datePublished":"2021-06-01T08:08:25-03:00","description":"Recentemente, assistindo às conferencias da useR de 2020 descobri o Metaflow. Dentre várias features oferecidas pela ferramenta desenvolvida na Netflix a proposta principal é tornar possível a prototipagem do código localmente e executar algumas partes na nuvem (apenas o tuning do modelo, por exemplo)","url":"http://localhost:4000/2021/06/01/metaflow-setup/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2021/06/01/metaflow-setup/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Dnnes" />
+</head>
+
+
+  <body>
+
+    <div class="container pure-g"><div class="sidebar-left pure-u-1 pure-u-md-1-4" style="background-color: rgb(90, 108, 111); color: rgb(255, 255, 255); background-image: url(/);"><header class="masthead">
+  
+  <div class="masthead-title">
+    <a href="/" title="Home">Dnnes</a>
+  </div>
+  <div class="masthead-tagline">
+    <small></small>
+  </div><nav class="navigation">
+    <ul class="navigation-list"><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/">Blog</a>
+      </li><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/about/">About</a>
+      </li></ul>
+  </nav><div class="social pure-menu pure-menu-horizontal">
+      <ul class="social-icons pure-menu-list">
+      <li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="mailto://diego.nnesf@gmail.com">
+            <i class="fas fa-envelope" title="Email"></i>
+          </a>
+        </li><li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="https://github.com/dnnes">
+            <i class="fab fa-github" title="GitHub"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+</header>
+</div>
+
+      <div class="content pure-u-1 pure-u-md-1-2"><main>
+  <article class="post">
+  <h1 class="post-title">Metaflow  - Configuração Mínima</h1>
+  <div class="post-meta"><time datetime="2021-06-01T08:08:25-03:00" itemprop="datePublished">1 Jun 2021</time><span> ~ </span><time datetime="2021-06-01T08:08:25-03:00" itemprop="dateModified">
+        1 Jun 2021
+      </time></div>
+
+  <p>Recentemente, assistindo às conferencias da useR de 2020 descobri o  <a href="https://www.youtube.com/watch?v=gtrODWCpXeo">Metaflow</a>. Dentre várias features oferecidas pela ferramenta desenvolvida na Netflix a proposta principal é tornar possível a prototipagem do código localmente e executar algumas partes na nuvem (apenas o tuning do modelo, por exemplo) <!--more--> utilizando os recursos escaláveis de computação da AWS. Isso me chamou muito a atenção já que o processamento local nem sempre é suficiente para algumas tarefas mais exigentes e a execução do código totalmente na nuvem é uma tarefa que às vezes consome tempo.</p>
+
+<p>Posto de um modo simples, a ideia do Metaflow é permitir que o cientista de dados na etapa de desenvolvimento do modelo não perca muito tempo com o provisionamento de infraestrutura e foque mais em otimização e em feature engineering, por exemplo. Um meio do caminho entre prototipagem e produção.</p>
+
+<h3 id="metaflow-e-aws">Metaflow e AWS</h3>
+
+<p>A biblioteca é open source, escrita em Python e compatível com R. Ainda está em desenvolvimento e uma grande quantidade de informação pode ser encontrada nas issues do diretorio no <a href="https://github.com/Netflix/metaflow">Github</a>. <em>Under the hood</em>, o Metaflow provê uma API para a stack de recursos na AWS previamente configurados. O código será executado em containers de instâncias EC2, Spot ou Fargate. Essas configurações podem ser feitas manualmente (seguindo este guia de deploy) ou por um template do CloudFormation que automatiza o processo. Eu preferi fazer as configs manuais, o template faz o provisionamento de um conjunto completo de serviços para quem quer utilizar todos os recursos do Metaflow, muito além do que eu preciso agora.</p>
+
+<p>Outro atrativo é que as modificações necessárias no código para a utilização do Metaflow não são nada complicadas. Um tempo maior é gasto configurando os recursos na AWS que na adaptação do código.</p>
+
+<h3 id="configurando">Configurando</h3>
+
+<p>Aqui eu vou apresentar um pequeno guia dos passos que segui para conseguir instalar e configurar o Metaflow com uma quantidade reduzida de recursos mas que me permitisse ainda executar o processamento na nuvem.</p>
+
+<p>O primeiro passo é instalar o <code class="language-plaintext highlighter-rouge">awscli</code>, no Debian se faz normalmente via <code class="language-plaintext highlighter-rouge">apt-get</code>.</p>
+
+<p>Em seguida, é necessário copiar suas credenciais AWS para <code class="language-plaintext highlighter-rouge">~/.aws/credentials</code>, o que vai permitir a autenticação tanto com o awscli quanto com o Metaflow. Fica assim:</p>
+
+<p><img src="/assets/credentials_f.png" alt="" /></p>
+
+<p>O Metaflow já pode ser instalado com o comando <code class="language-plaintext highlighter-rouge">pip install metaflow</code></p>
+
+<p>Agora os tutoriais podem ser baixados com o comando <code class="language-plaintext highlighter-rouge">metaflow tutorials pull</code>; para listar os tutoriais <code class="language-plaintext highlighter-rouge">metaflow tutorials list</code>; se tudo estiver certo, o resultado será parecido com isso:</p>
+
+<p><img src="/assets/tutorials.png" alt="" /></p>
+
+<p>No último passo o exemplo mínimo que vamos utilizar para testar se tudo foi configurado corretamente é o  <code class="language-plaintext highlighter-rouge">helloaws.py</code>.</p>
+
+<p>Os passos de configuração na AWS eu segui exatamente a <a href="https://admin-docs.metaflow.org/metaflow-on-aws/deployment-guide/manual-deployment">receita do manual</a>, não faz sentido reproduzir aqui.  Do passo de <strong>metadados</strong> pra frente não utilizei nenhum recurso.</p>
+
+<p>Resumindo, foi necessário criar:</p>
+
+<p>-S3 Buckets;</p>
+
+<p>-Elastic IP;</p>
+
+<p>-VPC que utiliza o Elastic IP previamente criado, com subnets pública e  privada, a pública deve possuir atribuição de IP;</p>
+
+<p>-Managed AWS Batch compute environment com instâncias EC2 On-Demand, Spot ou Fargate;</p>
+
+<p>-Queue para o Batch;</p>
+
+<p>-IAM para o Batch;</p>
+
+<p>Um modo de testar o login do awscli é executar a listagem dos buckets S3 com o comando <code class="language-plaintext highlighter-rouge">aws s3api list-buckets</code>:</p>
+
+<p><img src="/assets/list_buckets.png" alt="" /></p>
+
+<p>se obtiver algum erro de autenticação aqui, será necessário rever suas credenciais editando <code class="language-plaintext highlighter-rouge">~/.aws/credentials</code>.</p>
+
+<p>Se tudo estiver funcionando corretamente, é hora de executar <code class="language-plaintext highlighter-rouge">metaflow configure aws</code> e preencher com as ARN’s (Amazon Resource Name). Este comando cria o arquivo <code class="language-plaintext highlighter-rouge">config.json</code> em <code class="language-plaintext highlighter-rouge">~/.metaflowconfig/config.json</code>. O meu ficou assim:</p>
+
+<p><img src="/assets/config_json.png" alt="" /></p>
+
+<p>E por fim, para testar o se tudo está OK, eu rodo o tutorial <code class="language-plaintext highlighter-rouge">helloaws</code>:</p>
+
+<p><img src="/assets/all_process.png" alt="" /></p>
+
+<p>A primeira task é executada localmente. A segunda tarefa que vemos na imagem já roda na AWS; vemos o avanço do status da task na queue, o setup do ambiente e finalmente a tarefa é executada remotamente: um print “Metaflow says: Hi from AWS” (seguido de um warning de descontinuação de pacote na minha máquina).</p>
+
+<h3 id="simples-assim">Simples assim?</h3>
+<p>Aqui devo confessar que (por minha culpa)o processo não foi tão direto. Falhei em alguns passos do tutorial de deploy e por várias vezes, ao tentar executar o <code class="language-plaintext highlighter-rouge">helloaws.py</code>, me peguei assistindo o status RUNNABLE do AWS batch sendo impresso no terminal por alguns minutos antes de me convencer que não sairia disso e cancelar manualmente o job. Em outras tentativas, sem qualquer mudança nas configurações, tudo fluia sem maiores problemas. Verifiquei que a maquina virtual era criada e passei a desconfiar da VPC. Acabei criando um log na CloudWatch para a VPC que estava utilizando e percebi que a intermitência se devia à configuração das subnets. Provavelmente eu negligenciei o parágrafo do guia de deploy que diz <strong>“These subnets are not auto-assigned public IPv4 addresses. Instances launched in the public subnet must be assigned a public IPv4 address to communicate with the Amazon ECS service endpoint.”</strong> Editei a configuração de ip auto-atribuido na sub publica (na imagem abaixo, no canto superior direito) e tudo se resolveu. Até o momento não tive mais o problema.</p>
+
+<p><img src="/assets/public_ipv4.png" alt="" /></p>
+
+<h3 id="aws-educate">AWS Educate</h3>
+
+<p>Vale ressaltar que os créditos da aws educate, que estudantes de algumas universidades têm acesso, são válidos para configurar pelo menos as partes que eu utilizei (buckets S3, vpc com subnets, roles na iam, batch e instâncias ec2). A única ressalva é que as credenciais fornecidas pela Vocareum expiram em um intervalo de tempo fixo (aproximadamente 3hrs) e se a tarefa posta na fila não for concluida antes do termino desse intervalo, você pode obter o erro “An error occurred (ExpiredTokenException) when calling the DescribeJobs operation: The security token included in the request is expired”. Problema de resolução simples: só acessar e copiar as novas credenciais para o documento  ~/.aws/credentials no seu pc, que é automaticamente criado quando o aws cli é instalado.</p>
+
+<p><img src="/assets/access.png" alt="" /></p>
+
+<h3 id="próximos-posts">Próximos posts</h3>
+
+<p>Pretendo fazer pelo menos mais dois posts para esclarecer 1)Como utilizar containers personalizados e as vantagens de utilizar EC2, Spot ou Fargate; 2)Demonstrar o uso do metaflow com o R.</p>
+
+
+  
+    
+      <div class="post-tags-section">
+  <i class="post-tags-icon fas fa-tags"></i>
+  <ul class="post-tags"><li>
+        <a class="post-tag" href="/tags/#python">python</a></li><li>
+        <a class="post-tag" href="/tags/#r">r</a></li><li>
+        <a class="post-tag" href="/tags/#aws">aws</a></li><li>
+        <a class="post-tag" href="/tags/#metaflow">metaflow</a></li></ul>
+</div>
+
+  
+
+  
+</article>
+
+
+<aside class="related">
+  <h2>Related posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <a href="/2022/04/02/api_lambda/">
+          Pt2. Construindo uma API REST com o AWS Lambda
+          <small><time datetime="2022-04-02T00:00:00-03:00">02 Apr 2022</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2022/03/21/python_asyncio/">
+          Pt1. Capturando feed de dados em tempo real com Python
+          <small><time datetime="2022-03-21T00:00:00-03:00">21 Mar 2022</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2021/11/12/regressao_logistica/">
+          Regressão logística por gradient ascent
+          <small><time datetime="2021-11-12T00:00:00-03:00">12 Nov 2021</time></small>
+        </a>
+      </li>
+    
+  </ul>
+</aside>
+
+
+</main>
+
+<footer class="footer"><small>
+    &copy; 2021&nbsp;-&nbsp;2022 <a href="https://github.com/dnnes/">Dnnes</a>. All rights reserved.
+    Powered by <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://github.com/vszhub/not-pure-poole">Not Pure Poole</a>.
+  </small>
+</footer>
+</div>
+      <div class="sidebar-right pure-u-1 pure-u-md-1-4">
+<div  class="toc-wrapper">
+  <h2 class="toc-title">Tópicos</h2>
+    <nav class="toc-nav">
+      <ul class="toc">
+  <li><a href="#metaflow-e-aws">Metaflow e AWS</a></li>
+  <li><a href="#configurando">Configurando</a></li>
+  <li><a href="#simples-assim">Simples assim?</a></li>
+  <li><a href="#aws-educate">AWS Educate</a></li>
+  <li><a href="#próximos-posts">Próximos posts</a></li>
+</ul>
+
+  </nav>
+</div>
+
+</div>
+    </div>
+
+    <script async src="https://use.fontawesome.com/releases/v5.0.12/js/all.js"></script><script>
+  function strip(str, remove) {
+    while (str.length > 0 && remove.indexOf(str.charAt(0)) != -1) {
+      str = str.substr(1);
+    }
+    while (str.length > 0 && remove.indexOf(str.charAt(str.length - 1)) != -1) {
+      str = str.substr(0, str.length - 1);
+    }
+    return str;
+  }
+
+  function scroll() {
+    console.log('scroll');
+    window.scrollTo({
+      left: 0, 
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+    sessionStorage.removeItem('forceCheckScroll');
+  }
+
+  const forceCheckScroll = sessionStorage.getItem('forceCheckScroll') === 'true';
+  const checkScroll = strip(window.location.pathname, '/') !== strip('', '/');
+
+  if (forceCheckScroll || checkScroll) {
+    const maxWidth = "(max-width: 48rem)";
+    const result = window.matchMedia(maxWidth);
+    if (result.matches) {
+      scroll();
+    } else {
+      result.addListener((match) => {
+        if (match.media == maxWidth) {
+          if (match.matches) {
+            scroll();
+          }
+        }
+      });
+    }
+  }
+</script>
+</body>
+</html>

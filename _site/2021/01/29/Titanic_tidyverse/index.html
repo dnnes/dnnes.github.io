@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/syntax.css"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Utilizando Tidymodels com a base Titanic | Dnnes</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Utilizando Tidymodels com a base Titanic" />
+<meta name="author" content="Dnnes" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="Tidymodels A objetivo deste post é utilizar o framework Tidymodels para realizar o pré-processamento dos dados, aplicar modelos de classificação e ajustar os hiperparâmetros utilizando grid search. A ideia é ter um handout para consultar quando utilizar o Tidymodels" />
+<meta property="og:description" content="Tidymodels A objetivo deste post é utilizar o framework Tidymodels para realizar o pré-processamento dos dados, aplicar modelos de classificação e ajustar os hiperparâmetros utilizando grid search. A ideia é ter um handout para consultar quando utilizar o Tidymodels" />
+<link rel="canonical" href="http://localhost:4000/2021/01/29/Titanic_tidyverse/" />
+<meta property="og:url" content="http://localhost:4000/2021/01/29/Titanic_tidyverse/" />
+<meta property="og:site_name" content="Dnnes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-01-29T00:00:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Utilizando Tidymodels com a base Titanic" />
+<meta name="twitter:site" content="@dnnes" />
+<meta name="twitter:creator" content="@Dnnes" />
+<meta name="google-site-verification" content="xxxxx" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"Dnnes"},"headline":"Utilizando Tidymodels com a base Titanic","dateModified":"2021-01-29T00:00:00-03:00","datePublished":"2021-01-29T00:00:00-03:00","description":"Tidymodels A objetivo deste post é utilizar o framework Tidymodels para realizar o pré-processamento dos dados, aplicar modelos de classificação e ajustar os hiperparâmetros utilizando grid search. A ideia é ter um handout para consultar quando utilizar o Tidymodels","url":"http://localhost:4000/2021/01/29/Titanic_tidyverse/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2021/01/29/Titanic_tidyverse/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Dnnes" />
+</head>
+
+
+  <body>
+
+    <div class="container pure-g"><div class="sidebar-left pure-u-1 pure-u-md-1-4" style="background-color: rgb(90, 108, 111); color: rgb(255, 255, 255); background-image: url(/);"><header class="masthead">
+  
+  <div class="masthead-title">
+    <a href="/" title="Home">Dnnes</a>
+  </div>
+  <div class="masthead-tagline">
+    <small></small>
+  </div><nav class="navigation">
+    <ul class="navigation-list"><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/">Blog</a>
+      </li><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/about/">About</a>
+      </li></ul>
+  </nav><div class="social pure-menu pure-menu-horizontal">
+      <ul class="social-icons pure-menu-list">
+      <li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="mailto://diego.nnesf@gmail.com">
+            <i class="fas fa-envelope" title="Email"></i>
+          </a>
+        </li><li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="https://github.com/dnnes">
+            <i class="fab fa-github" title="GitHub"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+</header>
+</div>
+
+      <div class="content pure-u-1 pure-u-md-1-2"><main>
+  <article class="post">
+  <h1 class="post-title">Utilizando Tidymodels com a base Titanic</h1>
+  <div class="post-meta"><time datetime="2021-01-29T00:00:00-03:00" itemprop="datePublished">29 Jan 2021</time><span> • </span>
+      
+        <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+          Dnnes
+        </span></div>
+
+  <h2 id="tidymodels">Tidymodels</h2>
+
+<p>A objetivo deste post é utilizar o framework <code class="language-plaintext highlighter-rouge">Tidymodels</code> para realizar o pré-processamento dos dados, aplicar modelos de classificação e ajustar os hiperparâmetros utilizando <em>grid search</em>. A ideia é ter um handout para consultar quando utilizar o Tidymodels <!--more--></p>
+
+<p>A primeira vez que ouvi falar do Tidymodels fiquei bastante interessado com a proposta de facilitar parte do workflow da ciência de dados do cotidiano. No R temos muitas formas possíveis de resolver um mesmo problema (o que é ótimo!) e não é incomum concluirmos um script com uma lista bem grande de dependências (caret, e1071, MASS, fastDummies… e por aí vai). Ter um conjunto de ferramentas organizadas em um mesmo pacote e seguindo uma mesma filosofia, a exemplo do <code class="language-plaintext highlighter-rouge">Tidyverse</code>, me pareceu algo bem promissor e necessário tanto para análises locais como para a criação de modelos para produção.</p>
+
+<h2 id="importação-dos-dados">Importação dos dados</h2>
+
+<p>A base utilizada aqui é a Titanic e os modelos serão utilizados para classificar sobreviventes. As predições obtidas serão submetidas na competição <a href="https://www.kaggle.com/c/titanic/">Titanic - Machine Learning from Disaster</a>, do Kaggle.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">dplyr</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">readr</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">tidymodels</span><span class="p">)</span><span class="w">
+</span><span class="n">titanic_train</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">readr</span><span class="o">::</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"~/Kaggle/Titanic/train.csv"</span><span class="p">,</span><span class="w"> 
+                                 </span><span class="n">col_types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cols</span><span class="p">(</span><span class="n">Sex</span><span class="w"> </span><span class="o">=</span><span class="s1">'f'</span><span class="p">,</span><span class="w"> 
+                                                  </span><span class="n">Pclass</span><span class="w"> </span><span class="o">=</span><span class="s1">'f'</span><span class="p">,</span><span class="w"> 
+                                                  </span><span class="n">Survived</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'f'</span><span class="p">,</span><span class="w"> 
+                                                  </span><span class="n">Embarked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'f'</span><span class="p">))</span><span class="w">
+
+</span><span class="n">titanic_test</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">readr</span><span class="o">::</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"~/Kaggle/Titanic/test.csv"</span><span class="p">,</span><span class="w"> 
+                                </span><span class="n">col_types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cols</span><span class="p">(</span><span class="n">Sex</span><span class="w"> </span><span class="o">=</span><span class="s1">'f'</span><span class="p">,</span><span class="w"> 
+                                                 </span><span class="n">Pclass</span><span class="w"> </span><span class="o">=</span><span class="s1">'f'</span><span class="p">,</span><span class="w"> 
+                                                 </span><span class="n">Embarked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'f'</span><span class="p">))</span><span class="w">
+</span></code></pre></div></div>
+
+<p>O dataset do modo que é fornecido pelo Kaggle já está dividido entre treino e teste. No entanto, a função <code class="language-plaintext highlighter-rouge">initial_split()</code> do pacote <code class="language-plaintext highlighter-rouge">rsample</code> (parte do tidymodels) executa essa divisão de modo bem elegante.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">glimpse</span><span class="p">(</span><span class="n">titanic_train</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## Rows: 891
+## Columns: 12
+## $ PassengerId &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,…
+## $ Survived    &lt;fct&gt; 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1…
+## $ Pclass      &lt;fct&gt; 3, 1, 3, 1, 3, 3, 1, 3, 3, 2, 3, 1, 3, 3, 3, 2, 3, 2, 3, 3…
+## $ Name        &lt;chr&gt; "Braund, Mr. Owen Harris", "Cumings, Mrs. John Bradley (Fl…
+## $ Sex         &lt;fct&gt; male, female, female, female, male, male, male, male, fema…
+## $ Age         &lt;dbl&gt; 22, 38, 26, 35, 35, NA, 54, 2, 27, 14, 4, 58, 20, 39, 14, …
+## $ SibSp       &lt;dbl&gt; 1, 1, 0, 1, 0, 0, 0, 3, 0, 1, 1, 0, 0, 1, 0, 0, 4, 0, 1, 0…
+## $ Parch       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 0, 5, 0, 0, 1, 0, 0, 0…
+## $ Ticket      &lt;chr&gt; "A/5 21171", "PC 17599", "STON/O2. 3101282", "113803", "37…
+## $ Fare        &lt;dbl&gt; 7.2500, 71.2833, 7.9250, 53.1000, 8.0500, 8.4583, 51.8625,…
+## $ Cabin       &lt;chr&gt; NA, "C85", NA, "C123", NA, NA, "E46", NA, NA, NA, "G6", "C…
+## $ Embarked    &lt;fct&gt; S, C, S, S, S, Q, S, S, S, C, S, S, S, S, S, S, Q, S, S, C…
+</code></pre></div></div>
+
+<p>Vamos extrair o título de cada nome utilizando regex e essa será o único feature engineering aplicado. É interessante notar que no dataset de teste existe um título que não aparece no dataset de treino (Dona), este problema (novel factor level) será tratado com um <em>step</em> do <code class="language-plaintext highlighter-rouge">recipes</code>.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">titanic_train</span><span class="o">$</span><span class="n">Title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stringr</span><span class="o">::</span><span class="n">str_match</span><span class="p">(</span><span class="n">titanic_train</span><span class="o">$</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="s2">"([A-Za-z]+)\\."</span><span class="p">)[,</span><span class="m">2</span><span class="p">]</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> </span><span class="n">as.factor</span><span class="p">()</span><span class="w">
+</span><span class="n">titanic_test</span><span class="o">$</span><span class="n">Title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">stringr</span><span class="o">::</span><span class="n">str_match</span><span class="p">(</span><span class="n">titanic_test</span><span class="o">$</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="s2">"([A-Za-z]+)\\."</span><span class="p">)[,</span><span class="m">2</span><span class="p">]</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> </span><span class="n">as.factor</span><span class="p">()</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">summary</span><span class="p">(</span><span class="n">titanic_train</span><span class="p">,</span><span class="w"> </span><span class="n">maxsum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">20</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>##   PassengerId    Survived Pclass      Name               Sex     
+##  Min.   :  1.0   0:549    3:491   Length:891         male  :577  
+##  1st Qu.:223.5   1:342    1:216   Class :character   female:314  
+##  Median :446.0            2:184   Mode  :character               
+##  Mean   :446.0                                                   
+##  3rd Qu.:668.5                                                   
+##  Max.   :891.0                                                   
+##                                                                  
+##                                                                  
+##                                                                  
+##                                                                  
+##                                                                  
+##                                                                  
+##                                                                  
+##                                                                  
+##                                                                  
+##                                                                  
+##                                                                  
+##       Age            SibSp           Parch           Ticket         
+##  Min.   : 0.42   Min.   :0.000   Min.   :0.0000   Length:891        
+##  1st Qu.:20.12   1st Qu.:0.000   1st Qu.:0.0000   Class :character  
+##  Median :28.00   Median :0.000   Median :0.0000   Mode  :character  
+##  Mean   :29.70   Mean   :0.523   Mean   :0.3816                     
+##  3rd Qu.:38.00   3rd Qu.:1.000   3rd Qu.:0.0000                     
+##  Max.   :80.00   Max.   :8.000   Max.   :6.0000                     
+##  NA's   :177                                                        
+##                                                                     
+##                                                                     
+##                                                                     
+##                                                                     
+##                                                                     
+##                                                                     
+##                                                                     
+##                                                                     
+##                                                                     
+##                                                                     
+##       Fare           Cabin           Embarked        Title    
+##  Min.   :  0.00   Length:891         S   :644   Capt    :  1  
+##  1st Qu.:  7.91   Class :character   C   :168   Col     :  2  
+##  Median : 14.45   Mode  :character   Q   : 77   Countess:  1  
+##  Mean   : 32.20                      NA's:  2   Don     :  1  
+##  3rd Qu.: 31.00                                 Dr      :  7  
+##  Max.   :512.33                                 Jonkheer:  1  
+##                                                 Lady    :  1  
+##                                                 Major   :  2  
+##                                                 Master  : 40  
+##                                                 Miss    :182  
+##                                                 Mlle    :  2  
+##                                                 Mme     :  1  
+##                                                 Mr      :517  
+##                                                 Mrs     :125  
+##                                                 Ms      :  1  
+##                                                 Rev     :  6  
+##                                                 Sir     :  1
+</code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">summary</span><span class="p">(</span><span class="n">titanic_test</span><span class="p">,</span><span class="w"> </span><span class="n">maxsum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">20</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>##   PassengerId     Pclass      Name               Sex           Age       
+##  Min.   : 892.0   3:218   Length:418         male  :266   Min.   : 0.17  
+##  1st Qu.: 996.2   2: 93   Class :character   female:152   1st Qu.:21.00  
+##  Median :1100.5   1:107   Mode  :character                Median :27.00  
+##  Mean   :1100.5                                           Mean   :30.27  
+##  3rd Qu.:1204.8                                           3rd Qu.:39.00  
+##  Max.   :1309.0                                           Max.   :76.00  
+##                                                           NA's   :86     
+##                                                                          
+##                                                                          
+##      SibSp            Parch           Ticket               Fare        
+##  Min.   :0.0000   Min.   :0.0000   Length:418         Min.   :  0.000  
+##  1st Qu.:0.0000   1st Qu.:0.0000   Class :character   1st Qu.:  7.896  
+##  Median :0.0000   Median :0.0000   Mode  :character   Median : 14.454  
+##  Mean   :0.4474   Mean   :0.3923                      Mean   : 35.627  
+##  3rd Qu.:1.0000   3rd Qu.:0.0000                      3rd Qu.: 31.500  
+##  Max.   :8.0000   Max.   :9.0000                      Max.   :512.329  
+##                                                       NA's   :1        
+##                                                                        
+##                                                                        
+##     Cabin           Embarked    Title    
+##  Length:418         Q: 46    Col   :  2  
+##  Class :character   S:270    Dona  :  1  
+##  Mode  :character   C:102    Dr    :  1  
+##                              Master: 21  
+##                              Miss  : 78  
+##                              Mr    :240  
+##                              Mrs   : 72  
+##                              Ms    :  1  
+##                              Rev   :  2
+</code></pre></div></div>
+
+<h2 id="preparando-os-dados-com-recipes">Preparando os dados com <em>recipes</em></h2>
+
+<p>Podemos perceber que em ambos datasets existe <em>NA’s</em>. Vamos utilizar o pacote <code class="language-plaintext highlighter-rouge">recipes</code> para fazer a imputação desses dados com k-nearest neighbor e todos os outros pré-processamentos necessários para transformar os dados em uma matriz pronta para ser utilizada no treinamento dos modelos.
+Algo muito interessante do recipes é o encapsulamento da execução do pré-processamento: os passos definidos aqui utilizando o dataset de treino mais tarde serão aplicados ao dataset de teste quando o modelo for utilizado para predição. Isso além de facilitar muito a manutenção de todo o processo de ajuste de dados e modelagem, ajuda a evitar data leakage.</p>
+
+<p>Seguimos os passos:</p>
+
+<ul>
+  <li>
+    <p>Na função <code class="language-plaintext highlighter-rouge">recipe</code> primeiro definimos a fórmula que será utilizada nos modelos. A função já atribui <em>roles</em> às variáveis, sendo <em>Survived</em> rotulado como <em>outcome</em> e as outras 6 variáveis como <em>predictors</em>. Essa atribuição de papéis facilita muito a aplicação dos passos seguintes definidos na <em>recipe</em>, já que podemos, por exemplo, fazer uma referência a todos os predictors com a função <code class="language-plaintext highlighter-rouge">all_predictors()</code>.</p>
+  </li>
+  <li>
+    <p>Em seguida é aplicado o <code class="language-plaintext highlighter-rouge">step_novel</code> que determina o que deve ser feito caso um novo nível que não está presente no dataset de treino seja encontrado na variável <strong>Title</strong> durante uma posterior utilização do modelo(é o caso do título Dona). Aqui definimos que será rotulada para “n”.</p>
+  </li>
+  <li>
+    <p>Com <code class="language-plaintext highlighter-rouge">step_other</code> os níveis de menor frêquencia (definida no parâmetro threshold em 0.1% do total) da variável <strong>Title</strong> são convertidos e somados para um novo nível “other”.</p>
+  </li>
+  <li>
+    <p>Temos a especificação de um step de dummies para todas variáveis nominais que serão transformadas em binárias. Aqui eu utilizo o argumento <code class="language-plaintext highlighter-rouge">one_hot = T</code> para facilitar a visualização da importância das variáveis, assim haverá uma dummy para cada nível e não n-1 dummies, como é usual.</p>
+  </li>
+  <li>
+    <p>Por último, todos as variáveis são imputadas utilizando o algorítmo knn, preenchendo os valores faltantes (NA’s).</p>
+  </li>
+</ul>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">titanic_recipe</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">recipe</span><span class="p">(</span><span class="n">Survived</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">Sex</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Age</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Pclass</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Fare</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Title</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Embarked</span><span class="p">,</span><span class="w"> 
+                         </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">titanic_train</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">step_novel</span><span class="p">(</span><span class="n">Title</span><span class="p">,</span><span class="w"> </span><span class="n">new_level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"n"</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">step_other</span><span class="p">(</span><span class="n">Title</span><span class="p">,</span><span class="w"> </span><span class="n">threshold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.001</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">step_dummy</span><span class="p">(</span><span class="n">all_nominal</span><span class="p">(),</span><span class="n">one_hot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">T</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">Survived</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">step_knnimpute</span><span class="p">(</span><span class="n">all_predictors</span><span class="p">(),</span><span class="w"> </span><span class="n">neighbors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## Warning: `step_knnimpute()` was deprecated in recipes 0.1.16.
+## Please use `step_impute_knn()` instead.
+</code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">titanic_recipe</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## Data Recipe
+## 
+## Inputs:
+## 
+##       role #variables
+##    outcome          1
+##  predictor          6
+## 
+## Operations:
+## 
+## Novel factor level assignment for Title
+## Collapsing factor levels for Title
+## Dummy variables from all_nominal(), -Survived
+## K-nearest neighbor imputation for all_predictors()
+</code></pre></div></div>
+
+<p>O dataset resultande disso pode ser visualizado utilizando <code class="language-plaintext highlighter-rouge">prep()</code> + <code class="language-plaintext highlighter-rouge">bake()</code>. Perceba que foi criada a variável <em>Title_other</em>.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">titanic_recipe</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">prep</span><span class="p">(</span><span class="n">training</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">titanic_train</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">bake</span><span class="p">(</span><span class="n">new_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">titanic_test</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">glimpse</span><span class="p">()</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## Rows: 418
+## Columns: 28
+## $ Age            &lt;dbl&gt; 34.50000, 47.00000, 62.00000, 27.00000, 22.00000, 14.00…
+## $ Fare           &lt;dbl&gt; 7.8292, 7.0000, 9.6875, 8.6625, 12.2875, 9.2250, 7.6292…
+## $ Sex_male       &lt;dbl&gt; 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0…
+## $ Sex_female     &lt;dbl&gt; 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1…
+## $ Pclass_X3      &lt;dbl&gt; 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1…
+## $ Pclass_X1      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0…
+## $ Pclass_X2      &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0…
+## $ Title_Capt     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Col      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Countess &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Don      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Dr       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Jonkheer &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Lady     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Major    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Master   &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Miss     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1…
+## $ Title_Mlle     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Mme      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Mr       &lt;dbl&gt; 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0…
+## $ Title_Mrs      &lt;dbl&gt; 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0…
+## $ Title_Ms       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Rev      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_Sir      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Title_other    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Embarked_S     &lt;dbl&gt; 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1…
+## $ Embarked_C     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0…
+## $ Embarked_Q     &lt;dbl&gt; 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0…
+</code></pre></div></div>
+
+<h2 id="especificação-e-ajuste-do-modelo-com-parsnip-e-tune">Especificação e ajuste do modelo com <em>parsnip</em> e <em>tune</em></h2>
+
+<p>Na especificação do modelo o pacote <code class="language-plaintext highlighter-rouge">parsnip</code> entra em cena. Esse primeiro modelo será um RandomForest, então utilizamos a função <code class="language-plaintext highlighter-rouge">rand_forest()</code> para passar os parâmetros. A todos os parâmetros que serão buscados na grid devemos atribuir a função <code class="language-plaintext highlighter-rouge">tune()</code>, caso contrário, algum outro valor padrão será assumido.</p>
+
+<p>Aqui foi invocado o pacote <code class="language-plaintext highlighter-rouge">randomForest</code> na engine, porém o pacote <code class="language-plaintext highlighter-rouge">ranger</code> também pode ser utilizado sem problemas e com a vantagem de possuir alguns parâmetros a mais que o randomForest.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rf_spec</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">parsnip</span><span class="o">::</span><span class="n">rand_forest</span><span class="p">(</span><span class="w">
+  </span><span class="n">mtry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">(),</span><span class="w">
+  </span><span class="n">trees</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">(),</span><span class="w">
+  </span><span class="n">min_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">()</span><span class="w">
+</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">set_mode</span><span class="p">(</span><span class="s2">"classification"</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">set_engine</span><span class="p">(</span><span class="s2">"randomForest"</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>O <code class="language-plaintext highlighter-rouge">workflow()</code> é o elo entre o <code class="language-plaintext highlighter-rouge">parsnip</code> e o <code class="language-plaintext highlighter-rouge">recipes</code>. Adicionamos as especificações do modelo e o objeto recipe no workflow e chamamos a função <code class="language-plaintext highlighter-rouge">tune_grid()</code> para iniciar a busca dos hiperparâmetros no grid. O <code class="language-plaintext highlighter-rouge">workflow</code> também <em>empacota</em> o pré-processamento e o modelo, de modo que o preparo do recipe é executado em um único passo, sem necessidade do <code class="language-plaintext highlighter-rouge">prep()</code>:</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rf_wf</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">workflow</span><span class="p">()</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">add_model</span><span class="p">(</span><span class="n">rf_spec</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">add_recipe</span><span class="p">(</span><span class="n">titanic_recipe</span><span class="p">)</span><span class="w">
+
+</span><span class="n">rf_wf</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## ══ Workflow ════════════════════════════════════════════════════════════════════
+## Preprocessor: Recipe
+## Model: rand_forest()
+## 
+## ── Preprocessor ────────────────────────────────────────────────────────────────
+## 4 Recipe Steps
+## 
+## ● step_novel()
+## ● step_other()
+## ● step_dummy()
+## ● step_impute_knn()
+## 
+## ── Model ───────────────────────────────────────────────────────────────────────
+## Random Forest Model Specification (classification)
+## 
+## Main Arguments:
+##   mtry = tune()
+##   trees = tune()
+##   min_n = tune()
+## 
+## Computational engine: randomForest
+</code></pre></div></div>
+
+<p>Em seguida criamos o grid de ajuste dos hiperparâmetros e definimos as regras de cross-validation. Será utilizado um regular grid para o modelo RandomForest com uma combinação simples de valores para número de variáveis utilizadas por split, número de árvores (fixo em 1000) e tamanho mínimo de nó.</p>
+
+<p>O cross-validation será feito com 5 folds.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tune_grid</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">expand.grid</span><span class="p">(</span><span class="n">mtry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span><span class="o">:</span><span class="m">25</span><span class="p">,</span><span class="w"> </span><span class="n">trees</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">500</span><span class="p">),</span><span class="w"> </span><span class="n">min_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">seq</span><span class="p">(</span><span class="m">3</span><span class="p">,</span><span class="w"> </span><span class="m">15</span><span class="p">,</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">5</span><span class="p">))</span><span class="w">
+
+</span><span class="n">vb_folds</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rsample</span><span class="o">::</span><span class="n">vfold_cv</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">titanic_train</span><span class="p">,</span><span class="w"> </span><span class="n">strata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Survived</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Neste passo diversos modelos são criados e as métricas obtidas em cada fold são armazenadas no objeto <code class="language-plaintext highlighter-rouge">rf_tune_res</code>.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rf_tune_res</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">tune_grid</span><span class="p">(</span><span class="w">
+  </span><span class="n">rf_wf</span><span class="p">,</span><span class="w">
+  </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune_grid</span><span class="p">,</span><span class="w">
+  </span><span class="n">resamples</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vb_folds</span><span class="p">,</span><span class="w">
+  </span><span class="n">control</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control_grid</span><span class="p">(</span><span class="n">verbose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">T</span><span class="p">,</span><span class="w"> </span><span class="n">save_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">T</span><span class="p">)</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">viridis</span><span class="p">)</span><span class="w">
+</span><span class="n">autoplot</span><span class="p">(</span><span class="n">rf_tune_res</span><span class="p">)</span><span class="o">+</span><span class="w"> 
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">scale_color_viridis_d</span><span class="p">()</span><span class="w"> 
+</span></code></pre></div></div>
+
+<p><img src="/assets/2021-01-29-Titanic_tidyverse_files/figure-markdown_github/unnamed-chunk-12-1.png" alt="" /></p>
+
+<p>Podemos selecionar o melhor modelo com base na roc-auc utilizando <code class="language-plaintext highlighter-rouge">select_best</code> e o workflow é finalizado. Se passarmos o parâmetro “accuracy” em <code class="language-plaintext highlighter-rouge">select_best</code> a escolha é realizada selecionando a melhor acurácia. Ainda não temos um modelo ajustado. O que temos no objeto <em>final_rf</em> é um conjunto de passos que inicia no ajuste de dados e acaba na obtenção dos parâmetros que serão utilizados no modelo.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">best_rf</span><span class="o">&lt;-</span><span class="w"> </span><span class="n">select_best</span><span class="p">(</span><span class="n">rf_tune_res</span><span class="p">)</span><span class="w">
+</span><span class="n">best_rf</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## # A tibble: 1 x 4
+##    mtry trees min_n .config              
+##   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;                
+## 1    14   500     8 Preprocessor1_Model37
+</code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">final_rf</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">finalize_workflow</span><span class="p">(</span><span class="w">
+  </span><span class="n">rf_wf</span><span class="p">,</span><span class="w">
+  </span><span class="n">best_rf</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Finalmente o modelo é ajustado e a predição é gerada com os dados de teste. Agora sim temos o modelo no objeto <em>final_rf_fit</em>:</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">final_rf_fit</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">fit</span><span class="p">(</span><span class="n">final_rf</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">titanic_train</span><span class="p">)</span><span class="w">
+</span><span class="n">final_rf_fit</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## ══ Workflow [trained] ══════════════════════════════════════════════════════════
+## Preprocessor: Recipe
+## Model: rand_forest()
+## 
+## ── Preprocessor ────────────────────────────────────────────────────────────────
+## 4 Recipe Steps
+## 
+## ● step_novel()
+## ● step_other()
+## ● step_dummy()
+## ● step_impute_knn()
+## 
+## ── Model ───────────────────────────────────────────────────────────────────────
+## 
+## Call:
+##  randomForest(x = maybe_data_frame(x), y = y, ntree = ~500, mtry = min_cols(~14L,      x), nodesize = min_rows(~8, x)) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 14
+## 
+##         OOB estimate of  error rate: 16.16%
+## Confusion matrix:
+##     0   1 class.error
+## 0 502  47   0.0856102
+## 1  97 245   0.2836257
+</code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pred_rf</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">predict</span><span class="p">(</span><span class="n">final_rf_fit</span><span class="p">,</span><span class="w"> </span><span class="n">titanic_test</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Aqui podemos avaliar a importância das variáveis (índice gini) no modelo:</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pull_workflow_fit</span><span class="p">(</span><span class="n">final_rf_fit</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">vip</span><span class="o">::</span><span class="n">vip</span><span class="p">(</span><span class="n">aesthetics</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"#264653"</span><span class="p">))</span><span class="o">+</span><span class="w">
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="w"> 
+</span></code></pre></div></div>
+
+<p><img src="/assets/2021-01-29-Titanic_tidyverse_files/figure-markdown_github/unnamed-chunk-17-1.png" alt="" /></p>
+
+<h2 id="xgboost">Xgboost</h2>
+
+<p>Para fazer o ajuste do XGBoost o processo é semelhante. Aqui, por conta da maior quantidade de parâmetros a busca num regular grid teria um gasto computacional grande. Seguindo um <a href="https://juliasilge.com/blog/xgboost-tune-volleyball/">post da Julia Silge</a>, o modelo foi ajustado utilizando um hipercubo.</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xgb_spec</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">boost_tree</span><span class="p">(</span><span class="w">
+  </span><span class="n">trees</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">(),</span><span class="w"> 
+  </span><span class="n">tree_depth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">(),</span><span class="w"> 
+  </span><span class="n">min_n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">(),</span><span class="w"> 
+  </span><span class="n">loss_reduction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">(),</span><span class="w">                     
+  </span><span class="n">sample_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">(),</span><span class="w"> 
+  </span><span class="n">mtry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">(),</span><span class="w">         
+  </span><span class="n">learn_rate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tune</span><span class="p">()</span><span class="w">    
+</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">set_engine</span><span class="p">(</span><span class="s2">"xgboost"</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">set_mode</span><span class="p">(</span><span class="s2">"classification"</span><span class="p">)</span><span class="w">
+
+
+
+</span><span class="n">xgb_grid</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">grid_latin_hypercube</span><span class="p">(</span><span class="w">
+  </span><span class="n">tree_depth</span><span class="p">(),</span><span class="w">
+  </span><span class="n">min_n</span><span class="p">(),</span><span class="w">
+  </span><span class="n">trees</span><span class="p">(</span><span class="n">range</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">500L</span><span class="p">,</span><span class="w"> </span><span class="m">1500L</span><span class="p">)),</span><span class="w">
+  </span><span class="n">loss_reduction</span><span class="p">(),</span><span class="w">
+  </span><span class="n">sample_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sample_prop</span><span class="p">(),</span><span class="w">
+  </span><span class="n">mtry</span><span class="p">(</span><span class="n">range</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="w"> </span><span class="m">25</span><span class="p">)),</span><span class="w">
+  </span><span class="n">learn_rate</span><span class="p">(),</span><span class="w">
+  </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">50</span><span class="w">
+</span><span class="p">)</span><span class="w">
+
+
+
+</span><span class="n">xgb_wf</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">workflow</span><span class="p">()</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">add_recipe</span><span class="p">(</span><span class="n">titanic_recipe</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">add_model</span><span class="p">(</span><span class="n">xgb_spec</span><span class="p">)</span><span class="w">
+
+
+
+
+</span><span class="n">xgb_res</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">tune_grid</span><span class="p">(</span><span class="w">
+  </span><span class="n">xgb_wf</span><span class="p">,</span><span class="w">
+  </span><span class="n">resamples</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vb_folds</span><span class="p">,</span><span class="w">
+  </span><span class="n">grid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">xgb_grid</span><span class="p">,</span><span class="w">
+  </span><span class="n">control</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">control_grid</span><span class="p">(</span><span class="n">verbose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">T</span><span class="p">,</span><span class="w"> </span><span class="n">save_pred</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">T</span><span class="p">)</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">autoplot</span><span class="p">(</span><span class="n">xgb_res</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme</span><span class="p">(</span><span class="n">axis.text.x</span><span class="o">=</span><span class="n">element_text</span><span class="p">(</span><span class="n">angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">-90</span><span class="p">,</span><span class="w"> </span><span class="n">hjust</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="p">))</span><span class="w"> 
+</span></code></pre></div></div>
+
+<p><img src="/assets/2021-01-29-Titanic_tidyverse_files/figure-markdown_github/unnamed-chunk-19-1.png" alt="" /></p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">best_xgb</span><span class="o">&lt;-</span><span class="w"> </span><span class="n">select_best</span><span class="p">(</span><span class="n">xgb_res</span><span class="p">)</span><span class="w">
+
+</span><span class="n">final_xgb</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">finalize_workflow</span><span class="p">(</span><span class="w">
+  </span><span class="n">xgb_wf</span><span class="p">,</span><span class="w">
+  </span><span class="n">best_xgb</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">final_xgb_fit</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">fit</span><span class="p">(</span><span class="n">final_xgb</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">titanic_train</span><span class="p">)</span><span class="w">
+</span><span class="n">pred_xgb</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">predict</span><span class="p">(</span><span class="n">final_xgb_fit</span><span class="p">,</span><span class="w"> </span><span class="n">titanic_test</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pull_workflow_fit</span><span class="p">(</span><span class="n">final_xgb_fit</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">vip</span><span class="o">::</span><span class="n">vip</span><span class="p">(</span><span class="n">aesthetics</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"#264653"</span><span class="p">))</span><span class="o">+</span><span class="w">
+  </span><span class="n">theme_bw</span><span class="p">()</span><span class="w"> 
+</span></code></pre></div></div>
+
+<p><img src="/assets/2021-01-29-Titanic_tidyverse_files/figure-markdown_github/unnamed-chunk-22-1.png" alt="" /></p>
+
+<p>E por fim salvamos as predições e submetemos no Kaggle</p>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rf_final</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">PassengerId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">titanic_test</span><span class="o">$</span><span class="n">PassengerId</span><span class="p">,</span><span class="w"> </span><span class="n">Survived</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pred_rf</span><span class="p">)</span><span class="w">
+</span><span class="nf">names</span><span class="p">(</span><span class="n">rf_final</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s2">"PassengerId"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Survived"</span><span class="p">)</span><span class="w">
+</span><span class="n">readr</span><span class="o">::</span><span class="n">write_csv</span><span class="p">(</span><span class="n">rf_final</span><span class="p">,</span><span class="w"> </span><span class="s2">"rf_pred_final.csv"</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">xgb_final</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">PassengerId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">titanic_test</span><span class="o">$</span><span class="n">PassengerId</span><span class="p">,</span><span class="w"> </span><span class="n">Survived</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pred_xgb</span><span class="p">)</span><span class="w">
+</span><span class="nf">names</span><span class="p">(</span><span class="n">xgb_final</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s2">"PassengerId"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Survived"</span><span class="p">)</span><span class="w">
+</span><span class="n">readr</span><span class="o">::</span><span class="n">write_csv</span><span class="p">(</span><span class="n">xgb_final</span><span class="p">,</span><span class="w"> </span><span class="s2">"xg_pred_final.csv"</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Os scores obtidos são:</p>
+
+<p><img src="images/Titanic%20-%20Machine%20Learning%20from%20Disaster%20Kaggle.png" alt="" /></p>
+
+<p>Que me parece uma pontuação justa, pelo pouco esforço aplicado em feature engineering, seleção de variáveis e com base nesse post feito no board da competição: <a href="https://www.kaggle.com/c/titanic/discussion/26284">What’s a Good Score for the Titanic Competition?</a></p>
+
+<h2 id="referências">Referências</h2>
+
+<p>Boa parte deste estudo foi realizado utilizando os posts da <a href="https://juliasilge.com/">Julia Silge</a> e o material do <a href="https://rstudio-conf-2020.github.io/applied-ml/Part_1.html#1">Max Kuhn na rstudio::conf</a> de 2020 como referência. O livro <a href="https://www.tmwr.org/index.html">Tidy Modeling with R</a> dos mesmos autores aborda detalhadamente todo o framework e é uma leitura muito agradável.</p>
+
+
+  
+    
+      <div class="post-tags-section">
+  <i class="post-tags-icon fas fa-tags"></i>
+  <ul class="post-tags"><li>
+        <a class="post-tag" href="/tags/#r">r</a></li><li>
+        <a class="post-tag" href="/tags/#tidymodels">tidymodels</a></li></ul>
+</div>
+
+  
+
+  
+</article>
+
+
+<aside class="related">
+  <h2>Related posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <a href="/2022/04/02/api_lambda/">
+          Pt2. Construindo uma API REST com o AWS Lambda
+          <small><time datetime="2022-04-02T00:00:00-03:00">02 Apr 2022</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2022/03/21/python_asyncio/">
+          Pt1. Capturando feed de dados em tempo real com Python
+          <small><time datetime="2022-03-21T00:00:00-03:00">21 Mar 2022</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2021/11/12/regressao_logistica/">
+          Regressão logística por gradient ascent
+          <small><time datetime="2021-11-12T00:00:00-03:00">12 Nov 2021</time></small>
+        </a>
+      </li>
+    
+  </ul>
+</aside>
+
+
+</main>
+
+<footer class="footer"><small>
+    &copy; 2021&nbsp;-&nbsp;2022 <a href="https://github.com/dnnes/">Dnnes</a>. All rights reserved.
+    Powered by <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://github.com/vszhub/not-pure-poole">Not Pure Poole</a>.
+  </small>
+</footer>
+</div>
+      <div class="sidebar-right pure-u-1 pure-u-md-1-4">
+</div>
+    </div>
+
+    <script async src="https://use.fontawesome.com/releases/v5.0.12/js/all.js"></script><script>
+  function strip(str, remove) {
+    while (str.length > 0 && remove.indexOf(str.charAt(0)) != -1) {
+      str = str.substr(1);
+    }
+    while (str.length > 0 && remove.indexOf(str.charAt(str.length - 1)) != -1) {
+      str = str.substr(0, str.length - 1);
+    }
+    return str;
+  }
+
+  function scroll() {
+    console.log('scroll');
+    window.scrollTo({
+      left: 0, 
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+    sessionStorage.removeItem('forceCheckScroll');
+  }
+
+  const forceCheckScroll = sessionStorage.getItem('forceCheckScroll') === 'true';
+  const checkScroll = strip(window.location.pathname, '/') !== strip('', '/');
+
+  if (forceCheckScroll || checkScroll) {
+    const maxWidth = "(max-width: 48rem)";
+    const result = window.matchMedia(maxWidth);
+    if (result.matches) {
+      scroll();
+    } else {
+      result.addListener((match) => {
+        if (match.media == maxWidth) {
+          if (match.matches) {
+            scroll();
+          }
+        }
+      });
+    }
+  }
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+I"}<p>Not Pure Poole supports <a href="https://www.mathjax.org/">MathJax</a>. You can enable it on a page by setting <code class="language-plaintext highlighter-rouge">math: true</code> in the front matter.</p>
+
+<p>An inline math: \(E=mc^2\).</p>
+
+<p>A display math:</p>
+
+\[i\hbar \frac{\partial \Psi}{\partial t} = -\frac{\hbar^2}{2m}
+\frac{\partial^2 \Psi}{\partial x^2} + V \Psi\]
+:ET

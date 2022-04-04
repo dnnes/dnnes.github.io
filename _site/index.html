@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/syntax.css"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Dnnes</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Dnnes" />
+<meta name="author" content="Dnnes" />
+<meta property="og:locale" content="en" />
+<link rel="canonical" href="http://localhost:4000/" />
+<meta property="og:url" content="http://localhost:4000/" />
+<meta property="og:site_name" content="Dnnes" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Dnnes" />
+<meta name="twitter:site" content="@dnnes" />
+<meta name="twitter:creator" content="@Dnnes" />
+<meta name="google-site-verification" content="xxxxx" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"Dnnes"},"headline":"Dnnes","sameAs":["https://github.com/dnnes"],"url":"http://localhost:4000/","@type":"WebSite","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"name":"Dnnes","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Dnnes" />
+</head>
+
+
+  <body>
+
+    <div class="container pure-g"><div class="sidebar-left pure-u-1 pure-u-md-1-4" style="background-color: rgb(90, 108, 111); color: rgb(255, 255, 255); background-image: url(/);"><header class="masthead">
+  
+  <div class="masthead-title">
+    <a href="/" title="Home">Dnnes</a>
+  </div>
+  <div class="masthead-tagline">
+    <small></small>
+  </div><nav class="navigation">
+    <ul class="navigation-list"><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/">Blog</a>
+      </li><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/about/">About</a>
+      </li></ul>
+  </nav><div class="social pure-menu pure-menu-horizontal">
+      <ul class="social-icons pure-menu-list">
+      <li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="mailto://diego.nnesf@gmail.com">
+            <i class="fas fa-envelope" title="Email"></i>
+          </a>
+        </li><li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="https://github.com/dnnes">
+            <i class="fab fa-github" title="GitHub"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+</header>
+</div>
+
+      <div class="content pure-u-1 pure-u-md-1-2"><main>
+  <div class="home-header pure-menu pure-menu-horizontal">
+  <div class="home-header-bar">
+    
+    <ul class="home-header-menu pure-menu-list">
+      
+        <li class="pure-menu-item">
+          <a href="/dates/" class="pure-menu-link "">Dates</a>
+        </li>
+      
+        <li class="pure-menu-item">
+          <a href="/tags/" class="pure-menu-link "">Tags</a>
+        </li>
+      
+    </ul>
+    
+  </div>
+</div>
+
+
+<div class="posts">
+  
+  <section class="post-entry">
+    <h2 class="post-title">
+      <a href="/2022/04/02/api_lambda/">
+        Pt2. Construindo uma API REST com o AWS Lambda
+      </a>
+    </h2>
+
+    <div class="post-meta">
+      <time datetime="2022-04-02T00:00:00-03:00">02 Apr 2022</time></div>
+
+    <p>true
+
+O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo.
+
+</p>
+  </section>
+  
+  <section class="post-entry">
+    <h2 class="post-title">
+      <a href="/2022/03/21/python_asyncio/">
+        Pt1. Capturando feed de dados em tempo real com Python
+      </a>
+    </h2>
+
+    <div class="post-meta">
+      <time datetime="2022-03-21T00:00:00-03:00">21 Mar 2022</time></div>
+
+    <p>true
+
+O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST.
+
+</p>
+  </section>
+  
+  <section class="post-entry">
+    <h2 class="post-title">
+      <a href="/2021/11/12/regressao_logistica/">
+        Regressão logística por gradient ascent
+      </a>
+    </h2>
+
+    <div class="post-meta">
+      <time datetime="2021-11-12T00:00:00-03:00">12 Nov 2021</time></div>
+
+    <p>Neste post eu tento criar uma visualização que ajuda a entender como a regressão logística aprende a fronteira de decisão em um conjunto de dados.
+
+</p>
+  </section>
+  
+  <section class="post-entry">
+    <h2 class="post-title">
+      <a href="/2021/06/01/metaflow-setup/">
+        Metaflow  - Configuração Mínima
+      </a>
+    </h2>
+
+    <div class="post-meta">
+      <time datetime="2021-06-01T08:08:25-03:00">01 Jun 2021</time></div>
+
+    <p>Recentemente, assistindo às conferencias da useR de 2020 descobri o  Metaflow. Dentre várias features oferecidas pela ferramenta desenvolvida na Netflix a proposta principal é tornar possível a prototipagem do código localmente e executar algumas partes na nuvem (apenas o tuning do modelo, por exemplo)
+
+</p>
+  </section>
+  
+  <section class="post-entry">
+    <h2 class="post-title">
+      <a href="/2021/01/29/Titanic_tidyverse/">
+        Utilizando Tidymodels com a base Titanic
+      </a>
+    </h2>
+
+    <div class="post-meta">
+      <time datetime="2021-01-29T00:00:00-03:00">29 Jan 2021</time></div>
+
+    <p>Tidymodels
+
+A objetivo deste post é utilizar o framework Tidymodels para realizar o pré-processamento dos dados, aplicar modelos de classificação e ajustar os hiperparâmetros utilizando grid search. A ideia é ter um handout para consultar quando utilizar o Tidymodels
+
+</p>
+  </section>
+  </div>
+
+<div class="pagination">
+  
+    <span class="pagination-item older">Older</span>
+  
+  
+    <span class="pagination-item newer">Newer</span>
+  
+</div>
+
+</main>
+
+<footer class="footer"><small>
+    &copy; 2021&nbsp;-&nbsp;2022 <a href="https://github.com/dnnes/">Dnnes</a>. All rights reserved.
+    Powered by <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://github.com/vszhub/not-pure-poole">Not Pure Poole</a>.
+  </small>
+</footer>
+</div>
+      <div class="sidebar-right pure-u-1 pure-u-md-1-4">
+</div>
+    </div>
+
+    <script async src="https://use.fontawesome.com/releases/v5.0.12/js/all.js"></script><script>
+  function strip(str, remove) {
+    while (str.length > 0 && remove.indexOf(str.charAt(0)) != -1) {
+      str = str.substr(1);
+    }
+    while (str.length > 0 && remove.indexOf(str.charAt(str.length - 1)) != -1) {
+      str = str.substr(0, str.length - 1);
+    }
+    return str;
+  }
+
+  function scroll() {
+    console.log('scroll');
+    window.scrollTo({
+      left: 0, 
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+    sessionStorage.removeItem('forceCheckScroll');
+  }
+
+  const forceCheckScroll = sessionStorage.getItem('forceCheckScroll') === 'true';
+  const checkScroll = strip(window.location.pathname, '/') !== strip('', '/');
+
+  if (forceCheckScroll || checkScroll) {
+    const maxWidth = "(max-width: 48rem)";
+    const result = window.matchMedia(maxWidth);
+    if (result.matches) {
+      scroll();
+    } else {
+      result.addListener((match) => {
+        if (match.media == maxWidth) {
+          if (match.matches) {
+            scroll();
+          }
+        }
+      });
+    }
+  }
+</script>
+</body>
+</html>

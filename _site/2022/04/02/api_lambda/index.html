@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css" integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/grids-responsive-min.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/syntax.css"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Pt2. Construindo uma API REST com o AWS Lambda | Dnnes</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Pt2. Construindo uma API REST com o AWS Lambda" />
+<meta name="author" content="Dnnes" />
+<meta property="og:locale" content="en" />
+<meta name="description" content="true O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo." />
+<meta property="og:description" content="true O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo." />
+<link rel="canonical" href="http://localhost:4000/2022/04/02/api_lambda/" />
+<meta property="og:url" content="http://localhost:4000/2022/04/02/api_lambda/" />
+<meta property="og:site_name" content="Dnnes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-04-02T00:00:00-03:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Pt2. Construindo uma API REST com o AWS Lambda" />
+<meta name="twitter:site" content="@dnnes" />
+<meta name="twitter:creator" content="@Dnnes" />
+<meta name="google-site-verification" content="xxxxx" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"Dnnes"},"headline":"Pt2. Construindo uma API REST com o AWS Lambda","dateModified":"2022-04-02T00:00:00-03:00","datePublished":"2022-04-02T00:00:00-03:00","description":"true O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo.","url":"http://localhost:4000/2022/04/02/api_lambda/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2022/04/02/api_lambda/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Dnnes" />
+</head>
+
+
+  <body>
+
+    <div class="container pure-g"><div class="sidebar-left pure-u-1 pure-u-md-1-4" style="background-color: rgb(90, 108, 111); color: rgb(255, 255, 255); background-image: url(/);"><header class="masthead">
+  
+  <div class="masthead-title">
+    <a href="/" title="Home">Dnnes</a>
+  </div>
+  <div class="masthead-tagline">
+    <small></small>
+  </div><nav class="navigation">
+    <ul class="navigation-list"><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/">Blog</a>
+      </li><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/about/">About</a>
+      </li></ul>
+  </nav><div class="social pure-menu pure-menu-horizontal">
+      <ul class="social-icons pure-menu-list">
+      <li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="mailto://diego.nnesf@gmail.com">
+            <i class="fas fa-envelope" title="Email"></i>
+          </a>
+        </li><li class="pure-menu-item">
+          <a class="social-icon pure-menu-link" href="https://github.com/dnnes">
+            <i class="fab fa-github" title="GitHub"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+</header>
+</div>
+
+      <div class="content pure-u-1 pure-u-md-1-2"><main>
+  <article class="post">
+  <h1 class="post-title">Pt2. Construindo uma API REST com o AWS Lambda</h1>
+  <div class="post-meta"><time datetime="2022-04-02T00:00:00-03:00" itemprop="datePublished">2 Apr 2022</time><span> • </span>
+      
+        <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+          Dnnes
+        </span></div>
+
+  <p>true</p>
+
+<p>O DynamoDB é um serviço de banco de dados <em>serverless</em> NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca <code class="language-plaintext highlighter-rouge">boto3</code>). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo. <!--more--></p>
+
+<p><img src="/assets/writes_2022-04-02_16-02-51.png" alt="" /> <em>Escritas na tabela no período de testes. Neste intervalo foram criados cerca de 600.000 registros.</em></p>
+
+<h3 id="modelagem-no-dynamodb">Modelagem no DynamoDB</h3>
+
+<p>A modelagem da tabela é bem diferente do modelo de banco de dados relacional. É um assunto extenso e que eu preciso estudar muito ainda, mas alguns pontos importantes são:</p>
+<ol>
+  <li>A chave primária pode ser composta por dois campos, um será o partition key e outro o sort key e devem formar uma combinação única.</li>
+  <li>As chaves otimizam as queries e a tabela deve ser modelada tendo em vista os padrões de acesso.</li>
+  <li>Em apenas uma tabela é possível armazenar estruturas diferentes de dados (desde que possuam os campos da chave). Por exemplo, como os dados serão consumidos por uma API, em uma só tabela eu poderia armazenar todos os dados de uma exchange sem me preocupar com a diferença estrutural entre os items de cada canal, pensando apenas em como os dados serão servidos.</li>
+</ol>
+
+<p>Aqui um exemplo de duas estruturas de dados diferentes que fora armazenados na mesma tabela:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"id"</span><span class="p">:</span><span class="mi">1474637022322692</span><span class="p">,</span><span class="nl">"id_str"</span><span class="p">:</span><span class="s2">"1474637022322692"</span><span class="p">,</span><span class="nl">"order_type"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nl">"datetime"</span><span class="p">:</span><span class="s2">"1648853779"</span><span class="p">,</span><span class="nl">"microtimestamp"</span><span class="p">:</span><span class="s2">"1648853778936000"</span><span class="p">,</span><span class="nl">"amount"</span><span class="p">:</span><span class="mf">0.1349848</span><span class="p">,</span><span class="nl">"amount_str"</span><span class="p">:</span><span class="s2">"0.13498480"</span><span class="p">,</span><span class="nl">"price"</span><span class="p">:</span><span class="mf">46308.21</span><span class="p">,</span><span class="nl">"price_str"</span><span class="p">:</span><span class="s2">"46308.21"</span><span class="p">,</span><span class="w"> </span><span class="nl">"channel"</span><span class="p">:</span><span class="s2">"live_orders_btcusd"</span><span class="p">}</span><span class="w">
+
+</span><span class="p">{</span><span class="nl">"id"</span><span class="p">:</span><span class="mi">227050877</span><span class="p">,</span><span class="nl">"timestamp"</span><span class="p">:</span><span class="s2">"1648947384"</span><span class="p">,</span><span class="nl">"amount"</span><span class="p">:</span><span class="mf">0.01</span><span class="p">,</span><span class="nl">"amount_str"</span><span class="p">:</span><span class="s2">"0.01000000"</span><span class="p">,</span><span class="nl">"price"</span><span class="p">:</span><span class="mf">46035.88</span><span class="p">,</span><span class="nl">"price_str"</span><span class="p">:</span><span class="s2">"46035.88"</span><span class="p">,</span><span class="nl">"type"</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="nl">"microtimestamp"</span><span class="p">:</span><span class="s2">"1648947384302000"</span><span class="p">,</span><span class="nl">"buy_order_id"</span><span class="p">:</span><span class="mi">1475020428861441</span><span class="p">,</span><span class="nl">"sell_order_id"</span><span class="p">:</span><span class="mi">1475020429905922</span><span class="p">,</span><span class="w"> </span><span class="nl">"channel"</span><span class="p">:</span><span class="s2">"live_trades_btcusd}
+</span></code></pre></div></div>
+
+<p><em>Cada item possui uma estrutura e ambos possuem os campos da chave primária, desse modo podem ser armazenados na mesma tabela</em></p>
+
+<p>Eu utilizei os campos id e microtimestamp como chave principal porque cada par forma uma combinação única. No entanto, isso é considerado um <em>anti-padrão</em> já que nenhuma query será executada nesses campos. Eventualmente eu descobri que poderia criar <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SecondaryIndexes.html">índices secundários</a> com outros campos. Aí utilizei o nome do canal e o microtimestamp, esses campos sim servirão como argumentos de query na API.</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w"> </span><span class="nl">"TableName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bitstamp-live"</span><span class="err">,</span><span class="w">
+        </span><span class="nl">"KeySchema"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"AttributeName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"id"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"KeyType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HASH"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+            </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"AttributeName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"microtimestamp"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"KeyType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RANGE"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+
+<p><em>As chaves da tabela: Hash é a partition key e Range é a sort key</em></p>
+
+<p>Após rodar o script de coleta de dados por algumas horas eu percebi que o campo microtimestamp estava como string e teria que converter para formato numérico para poder executar as operações de comparação das queries (maior ou igual, menor, between…). No DynamoDB não existe um modo ‘rápido’ de fazer isso. É necessário iterar sobre todos os registros utilizando o scan() e fazer um update item a item (<a href="https://gist.github.com/dnnes/c43b919b1a05e8aa2d07221c5ab2b16c">aqui está um gist com o código utilizado</a>). Criei um novo campo chamado ‘nmicrotimestamp’ e adicionei um índice que tem como chave o nome do canal e o microtimestamp numerico (channel e nmicrotimestamp):</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"IndexName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"channel-nmicrotimestamp-index"</span><span class="err">,</span><span class="w">
+                </span><span class="nl">"KeySchema"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                    </span><span class="p">{</span><span class="w">
+                        </span><span class="nl">"AttributeName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"channel"</span><span class="p">,</span><span class="w">
+                        </span><span class="nl">"KeyType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HASH"</span><span class="w">
+                    </span><span class="p">},</span><span class="w">
+                    </span><span class="p">{</span><span class="w">
+                        </span><span class="nl">"AttributeName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nmicrotimestamp"</span><span class="p">,</span><span class="w">
+                        </span><span class="nl">"KeyType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RANGE"</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                </span><span class="p">]</span><span class="err">,</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Para cada query, o DynamoDB consegue retornar um documento JSON com no máximo 1MB (aproximadamente 5k itens, nesse caso). Quando a resposta passa de 1MB, o documento vem com o campo <code class="language-plaintext highlighter-rouge">LastEvaluatedKey</code> indicando a chave primária do último item que pôde ser retornado. Uma nova query deve ser feita utilizando os valores do <code class="language-plaintext highlighter-rouge">LastEvaluatedKey</code> como ponto de partida no campo <code class="language-plaintext highlighter-rouge">ExclusiveStartKey</code>. Esses passos devem ser repetidos até que todos os valores sejam recuperados e não haja mais itens no LastEvaluatedKey.
+<img src="/assets/JSON_LEK_2022-04-02_20-25-30.png" alt="" /> <em>Exemplo de resposta da API com o campo LastEvaluatedKey</em></p>
+
+<p>Eu poderia tratar esse problema no backend iterando a função Lambda até retornar todos os itens da query. Porém, seria necessário aumentar o timeout para valores bem altos pensando nos casos onde o documento teria, por exemplo, mais que 100MB. E a função Lambda idealmente (e isso fica claro pelo modo como é calculada a cobrança) deve realizar as tarefas em um curto espaço de tempo. Assim, eu decidi que essa limitação deveria ser tratada no lado do cliente, já que é preferível múltiplas requests de 1MB a uma só de 50MB ou mais.</p>
+
+<h3 id="aws-lambda-e-api-gateway">AWS Lambda e API Gateway</h3>
+
+<p>A API é simples: recebe o nome do canal e o intervalo de tempo que os dados serão recuperados. O backend é uma função Lambda que trata as requisições que chegam através da API Gateway. A função executa uma query no DynamoDB, o resultado da query é retornado no formato JSON e é enviado para o cliente pela API Gateway. Os parâmetros da query são passados na requisição pela <strong>query string</strong> da url e capturados na variável <strong>event</strong>.</p>
+
+<p>A API final ficou nesse formato:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://vspwaobhlj.execute-api.us-east-1.amazonaws.com/prod/bitstamp?channel=&amp;from=&amp;to=
+</code></pre></div></div>
+
+<p>A variável <code class="language-plaintext highlighter-rouge">channel</code> pode assumir um dos 4 nomes de canais que foram assinados no post anterior. <em>From</em> é o tempo inicial no formato <a href="https://en.wikipedia.org/wiki/Unix_time">Unix time</a> e <em>to</em> é o tempo final. Esse é o formato mais conveniente para trabalhar com milissegundos embora não seja ‘humanamente compreensível’ sem utilizar um <a href="https://www.unixtimestamp.com/">conversor</a>.</p>
+
+<p>O menor valor para a variável <code class="language-plaintext highlighter-rouge">from</code> é 1647830700000000 e o valor máximo para o <code class="language-plaintext highlighter-rouge">to</code> é 1647844020000000.</p>
+
+<p>A variável <code class="language-plaintext highlighter-rouge">channel</code> pode assumir: live_trades_btcusd, live_trades_ethusd, live_orders_btcusd, live_orders_ethusd.</p>
+
+<p>Tanto a API Gateway quanto a Lambda são serviços simples de configurar para esse caso. O código da função Lambda ficou assim:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">from</span> <span class="nn">boto3.dynamodb.conditions</span> <span class="kn">import</span> <span class="n">Key</span>
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    
+    <span class="n">dynamodb</span> <span class="o">=</span> <span class="n">boto3</span><span class="p">.</span><span class="n">resource</span><span class="p">(</span><span class="s">'dynamodb'</span><span class="p">)</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">dynamodb</span><span class="p">.</span><span class="n">Table</span><span class="p">(</span><span class="s">'bitstamp-live'</span><span class="p">)</span>
+    
+    <span class="n">channel</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s">"params"</span><span class="p">][</span><span class="s">"querystring"</span><span class="p">][</span><span class="s">"channel"</span><span class="p">]</span>
+    <span class="n">init</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s">"params"</span><span class="p">][</span><span class="s">"querystring"</span><span class="p">][</span><span class="s">"from"</span><span class="p">])</span>
+    <span class="n">to</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s">"params"</span><span class="p">][</span><span class="s">"querystring"</span><span class="p">][</span><span class="s">"to"</span><span class="p">])</span>
+    
+    <span class="n">query_result</span> <span class="o">=</span> <span class="n">table</span><span class="p">.</span><span class="n">query</span><span class="p">(</span><span class="n">IndexName</span> <span class="o">=</span> <span class="s">'channel-nmicrotimestamp-index'</span><span class="p">,</span> 
+                                <span class="n">KeyConditionExpression</span> <span class="o">=</span>
+                                <span class="n">Key</span><span class="p">(</span><span class="s">'channel'</span><span class="p">).</span><span class="n">eq</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span> <span class="o">&amp;</span>
+                                <span class="n">Key</span><span class="p">(</span><span class="s">'nmicrotimestamp'</span><span class="p">).</span><span class="n">between</span><span class="p">(</span><span class="n">init</span> <span class="p">,</span> <span class="n">to</span><span class="p">))</span>
+    
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">'statusCode'</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s">'headers'</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">'Content-Type'</span><span class="p">:</span> <span class="s">'application/json'</span><span class="p">,</span>
+        <span class="s">'Access-Control-Allow-Origin'</span><span class="p">:</span> <span class="s">'*'</span><span class="p">},</span>
+        <span class="s">'body'</span><span class="p">:</span> <span class="n">query_result</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>A função ganhou previamente um acesso ao dynamodb pelas configurações de IAM. A execução é bem direta: recupera os parâmetros que chegam através do <code class="language-plaintext highlighter-rouge">event</code>; esses parâmetros são passados para a query e por fim o resultado é retornado em formato json.</p>
+
+<p>A visão geral da API Gateway ficou assim:</p>
+
+<p><img src="/assets/API_Gateway.png" alt="" /></p>
+
+<p>A principal configuração é a da integração:</p>
+
+<p><img src="/assets/API_Gateway_integration.png" alt="" /></p>
+
+<p>Primeiro é necessário informar o tipo de integração (Lambda, nesse caso); segundo, o nome da função Lambda. No passo 3 é necessário informar os parâmetros da query string que serão utilizados no quarto passo. O quarto passo permite definir um template personalizado para acessar os parâmetros na função Lambda. Pelo template é possível definir um modo de acessar as variáveis de forma mais direta, por exemplo <code class="language-plaintext highlighter-rouge">event.channel</code>.</p>
+
+<h3 id="conclusão">Conclusão:</h3>
+
+<p>Neste projeto eu tive meu primeiro contato com o DynamoDB e com a AWS Lambda. Mesmo se tratando de uma aplicação pequena e que não testa as capacidades de escalabilidade (principalmente do Dyanamo), é sempre muito gratificante ver um <em>toy project</em> pronto. O maior valor está no processo de aprender através da leitura da documentação, de livros e posts de outros blogs. Essa habilidade, sem qualquer dúvida, é uma das mais utilizadas por qualquer desenvolvedor. Independente da senioridade.</p>
+
+<p>E por fim, aqui fica um exemplo funcional da API:</p>
+
+<p><a href="https://vspwaobhlj.execute-api.us-east-1.amazonaws.com/prod/bitstamp?channel=live_orders_btcusd&amp;from=1647817207170000&amp;to=1647819909209000">https://vspwaobhlj.execute-api.us-east-1.amazonaws.com/prod/bitstamp?channel=live_orders_btcusd&amp;from=1647817207170000&amp;to=1647819909209000</a></p>
+
+
+  
+    
+      <div class="post-tags-section">
+  <i class="post-tags-icon fas fa-tags"></i>
+  <ul class="post-tags"><li>
+        <a class="post-tag" href="/tags/#python">python</a></li><li>
+        <a class="post-tag" href="/tags/#dynamodb">dynamodb</a></li><li>
+        <a class="post-tag" href="/tags/#lambda">lambda</a></li><li>
+        <a class="post-tag" href="/tags/#aws">aws</a></li><li>
+        <a class="post-tag" href="/tags/#serverless">serverless</a></li><li>
+        <a class="post-tag" href="/tags/#api-gateway">api-gateway</a></li></ul>
+</div>
+
+  
+
+  
+</article>
+
+
+<aside class="related">
+  <h2>Related posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <a href="/2022/03/21/python_asyncio/">
+          Pt1. Capturando feed de dados em tempo real com Python
+          <small><time datetime="2022-03-21T00:00:00-03:00">21 Mar 2022</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2021/11/12/regressao_logistica/">
+          Regressão logística por gradient ascent
+          <small><time datetime="2021-11-12T00:00:00-03:00">12 Nov 2021</time></small>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/2021/06/01/metaflow-setup/">
+          Metaflow  - Configuração Mínima
+          <small><time datetime="2021-06-01T08:08:25-03:00">01 Jun 2021</time></small>
+        </a>
+      </li>
+    
+  </ul>
+</aside>
+
+
+</main>
+
+<footer class="footer"><small>
+    &copy; 2021&nbsp;-&nbsp;2022 <a href="https://github.com/dnnes/">Dnnes</a>. All rights reserved.
+    Powered by <a href="https://jekyllrb.com/">Jekyll</a> & <a href="https://github.com/vszhub/not-pure-poole">Not Pure Poole</a>.
+  </small>
+</footer>
+</div>
+      <div class="sidebar-right pure-u-1 pure-u-md-1-4">
+<div  class="toc-wrapper">
+  <h2 class="toc-title">Tópicos</h2>
+    <nav class="toc-nav">
+      <ul class="toc">
+  <li><a href="#modelagem-no-dynamodb">Modelagem no DynamoDB</a></li>
+  <li><a href="#aws-lambda-e-api-gateway">AWS Lambda e API Gateway</a></li>
+  <li><a href="#conclusão">Conclusão:</a></li>
+</ul>
+
+  </nav>
+</div>
+
+</div>
+    </div>
+
+    <script async src="https://use.fontawesome.com/releases/v5.0.12/js/all.js"></script><script>
+  function strip(str, remove) {
+    while (str.length > 0 && remove.indexOf(str.charAt(0)) != -1) {
+      str = str.substr(1);
+    }
+    while (str.length > 0 && remove.indexOf(str.charAt(str.length - 1)) != -1) {
+      str = str.substr(0, str.length - 1);
+    }
+    return str;
+  }
+
+  function scroll() {
+    console.log('scroll');
+    window.scrollTo({
+      left: 0, 
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+    sessionStorage.removeItem('forceCheckScroll');
+  }
+
+  const forceCheckScroll = sessionStorage.getItem('forceCheckScroll') === 'true';
+  const checkScroll = strip(window.location.pathname, '/') !== strip('', '/');
+
+  if (forceCheckScroll || checkScroll) {
+    const maxWidth = "(max-width: 48rem)";
+    const result = window.matchMedia(maxWidth);
+    if (result.matches) {
+      scroll();
+    } else {
+      result.addListener((match) => {
+        if (match.media == maxWidth) {
+          if (match.matches) {
+            scroll();
+          }
+        }
+      });
+    }
+  }
+</script>
+</body>
+</html>
