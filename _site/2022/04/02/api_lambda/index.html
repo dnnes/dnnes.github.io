@@ -13,8 +13,8 @@
 <meta property="og:title" content="Pt2. Construindo uma API REST com o AWS Lambda" />
 <meta name="author" content="Dnnes" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="true O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo." />
-<meta property="og:description" content="true O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo." />
+<meta name="description" content="O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo." />
+<meta property="og:description" content="O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo." />
 <link rel="canonical" href="http://localhost:4000/2022/04/02/api_lambda/" />
 <meta property="og:url" content="http://localhost:4000/2022/04/02/api_lambda/" />
 <meta property="og:site_name" content="Dnnes" />
@@ -26,7 +26,7 @@
 <meta name="twitter:creator" content="@Dnnes" />
 <meta name="google-site-verification" content="xxxxx" />
 <script type="application/ld+json">
-{"author":{"@type":"Person","name":"Dnnes"},"headline":"Pt2. Construindo uma API REST com o AWS Lambda","dateModified":"2022-04-02T00:00:00-03:00","datePublished":"2022-04-02T00:00:00-03:00","description":"true O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo.","url":"http://localhost:4000/2022/04/02/api_lambda/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2022/04/02/api_lambda/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
+{"author":{"@type":"Person","name":"Dnnes"},"headline":"Pt2. Construindo uma API REST com o AWS Lambda","dateModified":"2022-04-02T00:00:00-03:00","datePublished":"2022-04-02T00:00:00-03:00","description":"O DynamoDB é um serviço de banco de dados serverless NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca boto3). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo.","url":"http://localhost:4000/2022/04/02/api_lambda/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2022/04/02/api_lambda/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Dnnes" />
 </head>
@@ -44,6 +44,8 @@
   </div><nav class="navigation">
     <ul class="navigation-list"><li class="navigation-item">
         <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/">Blog</a>
+      </li><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/projetos/">Projetos</a>
       </li><li class="navigation-item">
         <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/about/">About</a>
       </li></ul>
@@ -72,9 +74,7 @@
           Dnnes
         </span></div>
 
-  <p>true</p>
-
-<p>O DynamoDB é um serviço de banco de dados <em>serverless</em> NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca <code class="language-plaintext highlighter-rouge">boto3</code>). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo. <!--more--></p>
+  <p>O DynamoDB é um serviço de banco de dados <em>serverless</em> NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca <code class="language-plaintext highlighter-rouge">boto3</code>). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo. <!--more--></p>
 
 <p><img src="/assets/writes_2022-04-02_16-02-51.png" alt="" /> <em>Escritas na tabela no período de testes. Neste intervalo foram criados cerca de 600.000 registros.</em></p>
 

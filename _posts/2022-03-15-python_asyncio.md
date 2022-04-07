@@ -19,8 +19,6 @@ title: 'Pt1. Capturando feed de dados em tempo real com Python'
 toc: True
 ---
 
-true
-
 O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST. <!--more-->
 
 Neste primeiro post escreverei sobre o processo de captura dos dados. Nos posts seguintes, falarei sobre a criação da API utilizando AWS Lambda e DynamoDB.

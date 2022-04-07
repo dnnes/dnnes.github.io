@@ -19,7 +19,6 @@ title: 'Pt2. Construindo uma API REST com o AWS Lambda'
 toc: True
 ---
 
-true
 
 O DynamoDB é um serviço de banco de dados *serverless* NoSQL da AWS . As requisições de escrita e leitura são feitas por HTTP (o processo é abstraido pela biblioteca `boto3`). No exemplo deste post, onde 4 canais foram assinados simultaneamente, o Dynamo teve picos de 100 requests por segundo e não retornou nenhum erro. Segundo a Amazon, o limite é de 1000 escritas por segundo. <!--more-->
 

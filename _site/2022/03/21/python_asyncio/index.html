@@ -13,8 +13,8 @@
 <meta property="og:title" content="Pt1. Capturando feed de dados em tempo real com Python" />
 <meta name="author" content="Dnnes" />
 <meta property="og:locale" content="en" />
-<meta name="description" content="true O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST." />
-<meta property="og:description" content="true O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST." />
+<meta name="description" content="O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST." />
+<meta property="og:description" content="O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST." />
 <link rel="canonical" href="http://localhost:4000/2022/03/21/python_asyncio/" />
 <meta property="og:url" content="http://localhost:4000/2022/03/21/python_asyncio/" />
 <meta property="og:site_name" content="Dnnes" />
@@ -26,7 +26,7 @@
 <meta name="twitter:creator" content="@Dnnes" />
 <meta name="google-site-verification" content="xxxxx" />
 <script type="application/ld+json">
-{"author":{"@type":"Person","name":"Dnnes"},"headline":"Pt1. Capturando feed de dados em tempo real com Python","dateModified":"2022-03-21T00:00:00-03:00","datePublished":"2022-03-21T00:00:00-03:00","description":"true O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST.","url":"http://localhost:4000/2022/03/21/python_asyncio/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2022/03/21/python_asyncio/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
+{"author":{"@type":"Person","name":"Dnnes"},"headline":"Pt1. Capturando feed de dados em tempo real com Python","dateModified":"2022-03-21T00:00:00-03:00","datePublished":"2022-03-21T00:00:00-03:00","description":"O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST.","url":"http://localhost:4000/2022/03/21/python_asyncio/","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2022/03/21/python_asyncio/"},"publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/logo.png"},"name":"Dnnes"},"@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Dnnes" />
 </head>
@@ -44,6 +44,8 @@
   </div><nav class="navigation">
     <ul class="navigation-list"><li class="navigation-item">
         <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/">Blog</a>
+      </li><li class="navigation-item">
+        <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/projetos/">Projetos</a>
       </li><li class="navigation-item">
         <a onclick="sessionStorage.setItem('forceCheckScroll', 'true')" href="/about/">About</a>
       </li></ul>
@@ -72,9 +74,7 @@
           Dnnes
         </span></div>
 
-  <p>true</p>
-
-<p>O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST. <!--more--></p>
+  <p>O objetivo deste projeto é desenvolver uma aplicação para capturar dados em tempo real e em alta velocidade do order book de uma exchange de criptoativos. Utilizando as capacidades de programação assíncrona do Python 3.9 e serviços da AWS, a aplicação será capaz de armazenar os dados em uma tabela do DyanamoDB. Esses dados serão disponibilizados em uma API REST. <!--more--></p>
 
 <p>Neste primeiro post escreverei sobre o processo de captura dos dados. Nos posts seguintes, falarei sobre a criação da API utilizando AWS Lambda e DynamoDB.</p>
 

@@ -33,6 +33,9 @@
 <loc>http://localhost:4000/</loc>
 </url>
 <url>
+<loc>http://localhost:4000/projetos/</loc>
+</url>
+<url>
 <loc>http://localhost:4000/tags/</loc>
 </url>
 </urlset>
